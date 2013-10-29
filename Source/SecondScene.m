@@ -14,7 +14,7 @@
     self = [super init];
     
     if (self) {
-        self.debugDraw = TRUE;
+        //self.debugDraw = TRUE;
         self.physicsNode.gravity = ccp(0, 0);
         self.userInteractionEnabled = TRUE;
     }
@@ -48,7 +48,9 @@
         bullet.physicsBody.velocity = ccp(100, 0);
         bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
         [self addChild:bullet];
-
+        
+        CCFollow *follow = [CCFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 1000, 320)];
+        [self runAction:follow];
     }];
     [animationManager runAnimationsForSequenceNamed:@"catapult"];
 }
