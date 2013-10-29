@@ -15,7 +15,7 @@
     
     if (self) {
         self.debugDraw = TRUE;
-        self.physicsNode.gravity = ccp(0, -50);
+        self.physicsNode.gravity = ccp(0, 0);
         self.userInteractionEnabled = TRUE;
     }
     
@@ -36,7 +36,20 @@
 
 - (void)fire {
     NSLog(@"Fire");
+    CCSprite *bullet = [CCSprite spriteWithImageNamed:@"flyingpenguin.png"];
+    bullet.position = ccp(0, self.catapultArm.contentSize.height);
+    [self.catapultArm addChild:bullet];
+    
     CCBAnimationManager* animationManager = self.userObject;
+    [animationManager setCompletedAnimationCallbackBlock:^(id sender) {
+        [bullet removeFromParent];
+        bullet.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:5 andCenter:bullet.position];
+        bullet.physicsBody.mass = 1.f;
+        bullet.physicsBody.velocity = ccp(100, 0);
+        bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
+        [self addChild:bullet];
+
+    }];
     [animationManager runAnimationsForSequenceNamed:@"catapult"];
 }
 
