@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62A48D9518201E1B00936E89 /* SecondScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 62A48D9418201E1B00936E89 /* SecondScene.m */; };
+		62A48D9B18202C0900936E89 /* CCBScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 62A48D9A18202C0900936E89 /* CCBScene.m */; };
 		B737893B180761570076A88C /* Published-iOS in Resources */ = {isa = PBXBuildFile; fileRef = B737893A180761570076A88C /* Published-iOS */; };
 		B737893F1807617C0076A88C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B737893E1807617C0076A88C /* AppDelegate.m */; };
 		B7378963180761C30076A88C /* CCBAnimationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B7378953180761C30076A88C /* CCBAnimationManager.m */; };
@@ -79,6 +81,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		62A48D9318201E1B00936E89 /* SecondScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SecondScene.h; path = Source/SecondScene.h; sourceTree = "<group>"; };
+		62A48D9418201E1B00936E89 /* SecondScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SecondScene.m; path = Source/SecondScene.m; sourceTree = "<group>"; };
+		62A48D9918202C0900936E89 /* CCBScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCBScene.h; sourceTree = "<group>"; };
+		62A48D9A18202C0900936E89 /* CCBScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCBScene.m; sourceTree = "<group>"; };
 		B737893A180761570076A88C /* Published-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Published-iOS"; path = "Source/Resources/Published-iOS"; sourceTree = SOURCE_ROOT; };
 		B737893D1807617C0076A88C /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Source/AppDelegate.h; sourceTree = "<group>"; };
 		B737893E1807617C0076A88C /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Source/AppDelegate.m; sourceTree = "<group>"; };
@@ -152,6 +158,8 @@
 				B737893E1807617C0076A88C /* AppDelegate.m */,
 				B7378992180767190076A88C /* MainScene.h */,
 				B7378993180767190076A88C /* MainScene.m */,
+				62A48D9318201E1B00936E89 /* SecondScene.h */,
+				62A48D9418201E1B00936E89 /* SecondScene.m */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -193,6 +201,8 @@
 				B737895C180761C30076A88C /* CCBSequenceProperty.h */,
 				B737895D180761C30076A88C /* CCBSequenceProperty.m */,
 				B737895E180761C30076A88C /* CCBuilderReader.h */,
+				62A48D9918202C0900936E89 /* CCBScene.h */,
+				62A48D9A18202C0900936E89 /* CCBScene.m */,
 			);
 			path = CCBReader;
 			sourceTree = "<group>";
@@ -402,10 +412,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				62A48D9518201E1B00936E89 /* SecondScene.m in Sources */,
 				B7378964180761C30076A88C /* CCBKeyframe.m in Sources */,
 				B7378967180761C30076A88C /* CCBsequence.m in Sources */,
 				B7378966180761C30076A88C /* CCBReader.m in Sources */,
 				B7378963180761C30076A88C /* CCBAnimationManager.m in Sources */,
+				62A48D9B18202C0900936E89 /* CCBScene.m in Sources */,
 				B737893F1807617C0076A88C /* AppDelegate.m in Sources */,
 				B7378994180767190076A88C /* MainScene.m in Sources */,
 				B7378968180761C30076A88C /* CCBSequenceProperty.m in Sources */,
