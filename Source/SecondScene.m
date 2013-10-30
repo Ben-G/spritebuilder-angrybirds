@@ -7,6 +7,7 @@
 //
 
 #import "SecondScene.h"
+#import <chipmunk/chipmunk.h>
 
 @implementation SecondScene
 
@@ -15,8 +16,14 @@
     
     if (self) {
         //self.debugDraw = TRUE;
-        self.physicsNode.gravity = ccp(0, 0);
+        self.physicsNode.gravity = ccp(0, -20);
         self.userInteractionEnabled = TRUE;
+        
+        CCNode *floorNode = [CCNode node];
+        CCPhysicsBody *floor = [CCPhysicsBody bodyWithRect:CGRectMake(0, 30, 1000, 10) cornerRadius:0.f];
+        floor.type = kCCPhysicsBodyTypeStatic;
+        floorNode.physicsBody = floor;
+        [self addChild:floorNode];
     }
     
     return self;
@@ -43,13 +50,13 @@
     CCBAnimationManager* animationManager = self.userObject;
     [animationManager setCompletedAnimationCallbackBlock:^(id sender) {
         [bullet removeFromParent];
-        bullet.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:5 andCenter:bullet.position];
-        bullet.physicsBody.mass = 1.f;
-        bullet.physicsBody.velocity = ccp(100, 0);
+        bullet.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:5 andCenter:ccp(bullet.contentSize.width/2, bullet.contentSize.height /2)];
+        bullet.physicsBody.mass = 500.f;
+        bullet.physicsBody.velocity = ccp(150, 0);
         bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
         [self addChild:bullet];
         
-        CCFollow *follow = [CCFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 1000, 320)];
+        CCFollow *follow = [CCFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 960, 320)];
         [self runAction:follow];
     }];
     [animationManager runAnimationsForSequenceNamed:@"catapult"];
@@ -61,8 +68,7 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
-    CGPoint location = [touch locationInView: [touch view]];
-    CGPoint touchLocation = [self convertToNodeSpace:location];
+    CGPoint touchLocation = [[CCDirector sharedDirector] convertToGL:[touch locationInView:[CCDirector sharedDirector].view]];
     
     if (CGRectContainsPoint([self.catapultArm boundingBox], touchLocation)) {
         [self fire];
