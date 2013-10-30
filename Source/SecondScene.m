@@ -13,22 +13,16 @@
     BOOL shot;
 }
 
-- (id)init {
-    self = [super init];
+- (void)didLoadFromCCB {
+    self.contentContainer.physicsNode.debugDraw = TRUE;
+    self.contentContainer.physicsNode.gravity = ccp(0, -400);
+    self.userInteractionEnabled = TRUE;
     
-    if (self) {
-        //self.debugDraw = TRUE;
-        self.physicsNode.gravity = ccp(0, -400);
-        self.userInteractionEnabled = TRUE;
-        
-        CCNode *floorNode = [CCNode node];
-        CCPhysicsBody *floor = [CCPhysicsBody bodyWithRect:CGRectMake(0, 30, 1000, 10) cornerRadius:0.f];
-        floor.type = kCCPhysicsBodyTypeStatic;
-        floorNode.physicsBody = floor;
-        [self addChild:floorNode];
-}
-    
-    return self;
+    CCNode *floorNode = [CCNode node];
+    CCPhysicsBody *floor = [CCPhysicsBody bodyWithRect:CGRectMake(0, 30, 1000, 10) cornerRadius:0.f];
+    floor.type = kCCPhysicsBodyTypeStatic;
+    floorNode.physicsBody = floor;
+    [self.contentContainer addChild:floorNode];
 }
 
 - (void)onAppear {
@@ -56,10 +50,10 @@
         bullet.physicsBody.mass = 500.f;
         bullet.physicsBody.velocity = ccp(450, 150);
         bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
-        [self addChild:bullet];
+        [self.contentContainer addChild:bullet];
         
         CCFollow *follow = [CCFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 960, 320)];
-        [self runAction:follow];
+        [self.contentContainer runAction:follow];
         self.flyingPenguin = bullet;
         shot = TRUE;
     }];
@@ -89,8 +83,7 @@
     if ((fabs(self.flyingPenguin.physicsBody.velocity.x) < 0.1) && (fabs(self.flyingPenguin.physicsBody.velocity.y) < 0.1) && fabs(self.flyingPenguin.physicsBody.angularVelocity) < 0.1) {
         // game over
         shot = FALSE;
-        CGSize screenSize = CGSizeMake([[[CCDirector sharedDirector] view] bounds].size.width,  [[[CCDirector sharedDirector] view] bounds].size.height);
-        self.gameOverLabel.position = ccp((-1) * self.position.x + screenSize.width / 2, (-1) * self.position.y + screenSize.height /2);
+        
         CCBAnimationManager* animationManager = self.userObject;
         [animationManager setCompletedAnimationCallbackBlock:^(id sender) {
             CCScene* myScene = [CCBReader sceneWithNodeGraphFromFile:@"MainScene.ccbi"];
