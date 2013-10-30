@@ -12,5 +12,8 @@
 
 @property (nonatomic, assign) CCNode *catapultArm;
 @property (nonatomic, assign) CCNode *penguin;
+@property (nonatomic, assign) CCNode *flyingPenguin;
+@property (nonatomic, assign) CCNode *background;
+@property (nonatomic, assign) CCNode *gameOverLabel;
 
 @end
