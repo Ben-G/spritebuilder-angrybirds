@@ -14,7 +14,7 @@
 }
 
 - (void)didLoadFromCCB {
-    self.contentContainer.physicsNode.debugDraw = TRUE;
+    //self.contentContainer.physicsNode.debugDraw = TRUE;
     self.contentContainer.physicsNode.gravity = ccp(0, -400);
     self.userInteractionEnabled = TRUE;
     
@@ -48,7 +48,7 @@
         [bullet removeFromParent];
         bullet.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:5 andCenter:ccp(bullet.contentSize.width/2, bullet.contentSize.height /2)];
         bullet.physicsBody.mass = 500.f;
-        bullet.physicsBody.velocity = ccp(450, 150);
+        bullet.physicsBody.velocity = ccp(450, 100);
         bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
         [self.contentContainer addChild:bullet];
         

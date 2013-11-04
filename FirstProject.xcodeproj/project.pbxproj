@@ -7,10 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		626AAD2418255D25008D96BB /* avenir-hd.fnt in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD1B18255D24008D96BB /* avenir-hd.fnt */; };
+		626AAD2518255D25008D96BB /* avenir-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD1C18255D24008D96BB /* avenir-hd.png */; };
+		626AAD2618255D25008D96BB /* avenir.fnt in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD1D18255D24008D96BB /* avenir.fnt */; };
+		626AAD2718255D25008D96BB /* avenir.png in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD1E18255D25008D96BB /* avenir.png */; };
+		626AAD2818255D25008D96BB /* coin-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD1F18255D25008D96BB /* coin-hd.png */; };
+		626AAD2918255D25008D96BB /* coin.png in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD2018255D25008D96BB /* coin.png */; };
+		626AAD2A18255D25008D96BB /* ScoreboardEntryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 626AAD2218255D25008D96BB /* ScoreboardEntryNode.m */; };
+		626AAD2B18255D25008D96BB /* ScoreBoardEntry.zip in Resources */ = {isa = PBXBuildFile; fileRef = 626AAD2318255D25008D96BB /* ScoreBoardEntry.zip */; };
 		62A48D9518201E1B00936E89 /* SecondScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 62A48D9418201E1B00936E89 /* SecondScene.m */; };
 		62A48D9B18202C0900936E89 /* CCBScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 62A48D9A18202C0900936E89 /* CCBScene.m */; };
-		62A48D9F1820731500936E89 /* flyingpenguin.png in Resources */ = {isa = PBXBuildFile; fileRef = 62A48D9E1820731500936E89 /* flyingpenguin.png */; };
-		B737893B180761570076A88C /* Published-iOS in Resources */ = {isa = PBXBuildFile; fileRef = B737893A180761570076A88C /* Published-iOS */; };
+		62A48DA61821B01C00936E89 /* Published-iOS in Resources */ = {isa = PBXBuildFile; fileRef = B737893A180761570076A88C /* Published-iOS */; };
 		B737893F1807617C0076A88C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B737893E1807617C0076A88C /* AppDelegate.m */; };
 		B7378963180761C30076A88C /* CCBAnimationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B7378953180761C30076A88C /* CCBAnimationManager.m */; };
 		B7378964180761C30076A88C /* CCBKeyframe.m in Sources */ = {isa = PBXBuildFile; fileRef = B7378955180761C30076A88C /* CCBKeyframe.m */; };
@@ -82,11 +89,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		626AAD1B18255D24008D96BB /* avenir-hd.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "avenir-hd.fnt"; sourceTree = "<group>"; };
+		626AAD1C18255D24008D96BB /* avenir-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "avenir-hd.png"; sourceTree = "<group>"; };
+		626AAD1D18255D24008D96BB /* avenir.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = avenir.fnt; sourceTree = "<group>"; };
+		626AAD1E18255D25008D96BB /* avenir.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avenir.png; sourceTree = "<group>"; };
+		626AAD1F18255D25008D96BB /* coin-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "coin-hd.png"; sourceTree = "<group>"; };
+		626AAD2018255D25008D96BB /* coin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin.png; sourceTree = "<group>"; };
+		626AAD2118255D25008D96BB /* ScoreboardEntryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScoreboardEntryNode.h; sourceTree = "<group>"; };
+		626AAD2218255D25008D96BB /* ScoreboardEntryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScoreboardEntryNode.m; sourceTree = "<group>"; };
+		626AAD2318255D25008D96BB /* ScoreBoardEntry.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = ScoreBoardEntry.zip; sourceTree = "<group>"; };
 		62A48D9318201E1B00936E89 /* SecondScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SecondScene.h; path = Source/SecondScene.h; sourceTree = "<group>"; };
 		62A48D9418201E1B00936E89 /* SecondScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SecondScene.m; path = Source/SecondScene.m; sourceTree = "<group>"; };
 		62A48D9918202C0900936E89 /* CCBScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCBScene.h; sourceTree = "<group>"; };
 		62A48D9A18202C0900936E89 /* CCBScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCBScene.m; sourceTree = "<group>"; };
-		62A48D9E1820731500936E89 /* flyingpenguin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = flyingpenguin.png; path = "Source/Resources/Published-iOS/ccbResources/resources-phone/flyingpenguin.png"; sourceTree = "<group>"; };
 		B737893A180761570076A88C /* Published-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Published-iOS"; path = "Source/Resources/Published-iOS"; sourceTree = SOURCE_ROOT; };
 		B737893D1807617C0076A88C /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Source/AppDelegate.h; sourceTree = "<group>"; };
 		B737893E1807617C0076A88C /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Source/AppDelegate.m; sourceTree = "<group>"; };
@@ -153,9 +168,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		626AAD1918255D24008D96BB /* MGWU_Components */ = {
+			isa = PBXGroup;
+			children = (
+				626AAD1A18255D24008D96BB /* ScoreBoardEntry */,
+				626AAD2318255D25008D96BB /* ScoreBoardEntry.zip */,
+			);
+			name = MGWU_Components;
+			path = Source/MGWU_Components;
+			sourceTree = "<group>";
+		};
+		626AAD1A18255D24008D96BB /* ScoreBoardEntry */ = {
+			isa = PBXGroup;
+			children = (
+				626AAD1B18255D24008D96BB /* avenir-hd.fnt */,
+				626AAD1C18255D24008D96BB /* avenir-hd.png */,
+				626AAD1D18255D24008D96BB /* avenir.fnt */,
+				626AAD1E18255D25008D96BB /* avenir.png */,
+				626AAD1F18255D25008D96BB /* coin-hd.png */,
+				626AAD2018255D25008D96BB /* coin.png */,
+				626AAD2118255D25008D96BB /* ScoreboardEntryNode.h */,
+				626AAD2218255D25008D96BB /* ScoreboardEntryNode.m */,
+			);
+			path = ScoreBoardEntry;
+			sourceTree = "<group>";
+		};
 		B737893C1807616C0076A88C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				626AAD1918255D24008D96BB /* MGWU_Components */,
 				B737893D1807617C0076A88C /* AppDelegate.h */,
 				B737893E1807617C0076A88C /* AppDelegate.m */,
 				B7378992180767190076A88C /* MainScene.h */,
@@ -229,7 +270,6 @@
 		B77F1B2517B978D7009739AE = {
 			isa = PBXGroup;
 			children = (
-				62A48D9E1820731500936E89 /* flyingpenguin.png */,
 				B737893C1807616C0076A88C /* Source */,
 				B77F1B4617B978D7009739AE /* Resources */,
 				B77F1B5E17B978D7009739AE /* libs */,
@@ -325,7 +365,6 @@
 				ORGANIZATIONNAME = Apportable;
 				TargetAttributes = {
 					B77F1B2D17B978D7009739AE = {
-						DevelopmentTeam = SBVP8ED765;
 						SystemCapabilities = {
 							com.apple.GameCenter = {
 								enabled = 0;
@@ -393,19 +432,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				62A48D9F1820731500936E89 /* flyingpenguin.png in Resources */,
+				62A48DA61821B01C00936E89 /* Published-iOS in Resources */,
 				B7378978180762440076A88C /* Default@2x.png in Resources */,
+				626AAD2918255D25008D96BB /* coin.png in Resources */,
+				626AAD2718255D25008D96BB /* avenir.png in Resources */,
 				B737897E180762440076A88C /* Icon@2x.png in Resources */,
 				B737896A180761C30076A88C /* README.md in Resources */,
-				B737893B180761570076A88C /* Published-iOS in Resources */,
 				B737897C180762440076A88C /* Icon-Small@2x.png in Resources */,
 				B7378976180762440076A88C /* Default-Landscape~ipad.png in Resources */,
 				B7378975180762440076A88C /* Default-568h@2x.png in Resources */,
 				B737897A180762440076A88C /* Icon-Small-50.png in Resources */,
+				626AAD2518255D25008D96BB /* avenir-hd.png in Resources */,
 				B7378979180762440076A88C /* Icon-72.png in Resources */,
+				626AAD2418255D25008D96BB /* avenir-hd.fnt in Resources */,
+				626AAD2818255D25008D96BB /* coin-hd.png in Resources */,
+				626AAD2618255D25008D96BB /* avenir.fnt in Resources */,
 				B737897D180762440076A88C /* Icon.png in Resources */,
 				B7378977180762440076A88C /* Default.png in Resources */,
 				B737897B180762440076A88C /* Icon-Small.png in Resources */,
+				626AAD2B18255D25008D96BB /* ScoreBoardEntry.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -416,6 +461,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				626AAD2A18255D25008D96BB /* ScoreboardEntryNode.m in Sources */,
 				62A48D9518201E1B00936E89 /* SecondScene.m in Sources */,
 				B7378964180761C30076A88C /* CCBKeyframe.m in Sources */,
 				B7378967180761C30076A88C /* CCBsequence.m in Sources */,
@@ -521,7 +567,7 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Source/Prefix.pch;

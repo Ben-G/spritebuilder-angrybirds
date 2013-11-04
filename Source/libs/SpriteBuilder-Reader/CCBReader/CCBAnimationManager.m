@@ -190,7 +190,7 @@ static NSInteger ccbAnimationManagerID = 0;
             return [CCSequence actionOne:[CCDelayTime actionWithDuration:duration] two:[CCHide action]];
         }
     }
-    else if ([name isEqualToString:@"displayFrame"])
+    else if ([name isEqualToString:@"spriteFrame"])
     {
         return [CCSequence actionOne:[CCDelayTime actionWithDuration:duration] two:[CCBSetSpriteFrame actionWithSpriteFrame:kf1.value]];
     }
