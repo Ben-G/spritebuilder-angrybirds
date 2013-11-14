@@ -8,7 +8,9 @@
 
 #import "ScoreboardEntryNode.h"
 
-@implementation ScoreboardEntryNode
+@implementation ScoreboardEntryNode {
+    CCSprite *_scoreIcon;
+}
 
 @synthesize score = _score;
 
@@ -70,7 +72,20 @@
     _score = score;
 }
 
-- (void)update:(ccTime)delta {
+- (void)setSpriteFrame:(CCSpriteFrame *)spriteFrame {
+    if (spriteFrame != nil) {
+        _scoreIcon.spriteFrame = spriteFrame;
+    } else {
+        CCSpriteFrame *spriteFrame = [CCSpriteFrame frameWithImageNamed:@"coin.png"];
+        _scoreIcon.spriteFrame = spriteFrame;
+    }
+}
+
+- (CCSpriteFrame *)spriteFrame {
+    return _scoreIcon.spriteFrame;
+}
+
+- (void)update:(CCTime)delta {
     _timeElapsed += delta;
     
     if ( (_displayScore != _score) && (_timeElapsed >= 0.02f))

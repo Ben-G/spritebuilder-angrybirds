@@ -5,7 +5,7 @@ dependencies: \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/CCGL.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/CCGLView.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTextureCache.h \
-  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexture2D.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexture.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/ccTypes.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/CCNS.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexturePVR.h \
@@ -17,4 +17,5 @@ dependencies: \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCResponderManager.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Support/CCFileUtils.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Support/NSThread+performBlock.h \
-  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/CCDirectorMac.h
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/CCDirectorMac.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexture_Private.h

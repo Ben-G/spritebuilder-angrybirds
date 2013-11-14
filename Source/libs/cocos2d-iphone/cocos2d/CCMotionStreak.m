@@ -29,9 +29,12 @@
 #import "CCGLProgram.h"
 #import "CCShaderCache.h"
 #import "ccMacros.h"
+#import "CCNode_Private.h"
 
 #import "Support/CCVertex.h"
 #import "Support/CGPointExtension.h"
+
+#import "CCTexture_Private.h"
 
 
 @implementation CCMotionStreak
@@ -44,7 +47,7 @@
     return [[self alloc] initWithFade:fade minSeg:minSeg width:stroke color:color textureFilename:path];
 }
 
-+ (id) streakWithFade:(float)fade minSeg:(float)minSeg width:(float)stroke color:(ccColor3B)color texture:(CCTexture2D*)texture
++ (id) streakWithFade:(float)fade minSeg:(float)minSeg width:(float)stroke color:(ccColor3B)color texture:(CCTexture*)texture
 {
     return [[self alloc] initWithFade:fade minSeg:minSeg width:stroke color:color texture:texture];
 }
@@ -53,11 +56,11 @@
 {
     NSAssert(path != nil, @"Invalid filename");
 
-    CCTexture2D *texture = [[CCTextureCache sharedTextureCache] addImage:path];
+    CCTexture *texture = [[CCTextureCache sharedTextureCache] addImage:path];
     return [self initWithFade:fade minSeg:minSeg width:stroke color:color texture:texture];
 }
 
-- (id) initWithFade:(float)fade minSeg:(float)minSeg width:(float)stroke color:(ccColor3B)color texture:(CCTexture2D*)texture
+- (id) initWithFade:(float)fade minSeg:(float)minSeg width:(float)stroke color:(ccColor3B)color texture:(CCTexture*)texture
 {
     self = [super init];
     if (self)
@@ -91,9 +94,7 @@
 		self.shaderProgram = [[CCShaderCache sharedShaderCache] programForKey:kCCShader_PositionTextureColor];
 
         [self setTexture:texture];
-        [self setColor:color];
-        [self scheduleUpdate];
-		
+        [super setColor:color];
     }
     return self;
 }
@@ -106,13 +107,13 @@
     _positionR = position;
 }
 
-- (void) tintWithColor:(ccColor3B)colors
+- (void) setColor:(ccColor3B)color
 {
-    [self setColor:colors];
+    [super setColor:color];
 
     // Fast assignation
     for(int i = 0; i<_nuPoints*2; i++)
-        *((ccColor3B*) (_colorPointer+i*4)) = colors;
+        *((ccColor3B*) (_colorPointer+i*4)) = color;
 }
 
 - (void) setOpacity:(GLubyte)opacity
@@ -128,7 +129,7 @@
 
 #pragma mark -
 
-- (void) update:(ccTime)delta
+- (void) update:(CCTime)delta
 {
 	if( !_startingPositionInitialized )
 		return;
@@ -213,16 +214,16 @@
         if(_nuPoints > 0 && _fastMode )
         {
             if(_nuPoints > 1)
-                ccVertexLineToPolygon(_pointVertexes, _stroke, _vertices, _nuPoints, 1);
+                CCVertexLineToPolygon(_pointVertexes, _stroke, _vertices, _nuPoints, 1);
             else
-                ccVertexLineToPolygon(_pointVertexes, _stroke, _vertices, 0, 2);
+                CCVertexLineToPolygon(_pointVertexes, _stroke, _vertices, 0, 2);
         }
 
         _nuPoints ++;
     }
 
     if( ! _fastMode )
-        ccVertexLineToPolygon(_pointVertexes, _stroke, _vertices, 0, _nuPoints);
+        CCVertexLineToPolygon(_pointVertexes, _stroke, _vertices, 0, _nuPoints);
 	
 	
 	// Updated Tex Coords only if they are different than previous step

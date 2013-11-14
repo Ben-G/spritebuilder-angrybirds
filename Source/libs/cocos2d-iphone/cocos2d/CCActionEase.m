@@ -68,7 +68,6 @@
 	return copy;
 }
 
-
 -(void) startWithTarget:(id)aTarget
 {
 	[super startWithTarget:aTarget];
@@ -81,7 +80,7 @@
 	[super stop];
 }
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
 	[_inner update: t];
 }
@@ -99,7 +98,7 @@
 //
 // EaseRateAction
 //
-@implementation CCEaseRateAction
+@implementation CCActionEaseRate
 @synthesize rate=_rate;
 +(id) actionWithAction: (CCActionInterval*) action rate:(float)rate
 {
@@ -130,8 +129,8 @@
 //
 // EeseIn
 //
-@implementation CCEaseIn
--(void) update: (ccTime) t
+@implementation CCActionEaseIn
+-(void) update: (CCTime) t
 {
 	[_inner update: powf(t,_rate)];
 }
@@ -140,8 +139,8 @@
 //
 // EaseOut
 //
-@implementation CCEaseOut
--(void) update: (ccTime) t
+@implementation CCActionEaseOut
+-(void) update: (CCTime) t
 {
 	[_inner update: powf(t,1/_rate)];
 }
@@ -150,8 +149,8 @@
 //
 // EaseInOut
 //
-@implementation CCEaseInOut
--(void) update: (ccTime) t
+@implementation CCActionEaseInOut
+-(void) update: (CCTime) t
 {
 	t *= 2;
 	if (t < 1) {
@@ -171,215 +170,12 @@
 @end
 
 #pragma mark -
-#pragma mark EaseExponential
-
-//
-// EaseExponentialIn
-//
-@implementation CCEaseExponentialIn
--(void) update: (ccTime) t
-{
-	[_inner update: (t==0) ? 0 : powf(2, 10 * (t/1 - 1)) /* - 1 * 0.001f */];
-}
-
-- (CCActionInterval*) reverse
-{
-	return [CCEaseExponentialOut actionWithAction: [_inner reverse]];
-}
-@end
-
-//
-// EaseExponentialOut
-//
-@implementation CCEaseExponentialOut
--(void) update: (ccTime) t
-{
-	[_inner update: (t==1) ? 1 : (-powf(2, -10 * t/1) + 1)];
-}
-
-- (CCActionInterval*) reverse
-{
-	return [CCEaseExponentialIn actionWithAction: [_inner reverse]];
-}
-@end
-
-//
-// EaseExponentialInOut
-//
-@implementation CCEaseExponentialInOut
--(void) update: (ccTime) t
-{
-	// prevents rouding errors
-	if( t != 1 && t != 0 ) {
-		t *= 2;
-		if (t < 1)
-			t = 0.5f * powf(2, 10 * (t - 1));
-		else
-			t = 0.5f * (-powf(2, -10 * (t -1) ) + 2);
-	}
-
-	[_inner update:t];
-}
-@end
-
-
-#pragma mark -
-#pragma mark EasePolynomial
-
-//
-// EasePolynomial
-//
-#define kDefaultPolynomial 6
-@implementation CCEasePolynomial
-
-@dynamic polynomialOrder;
-
-+(id) actionWithAction: (CCActionInterval*) action
-{
-    return [[self alloc] initWithAction: action];
-}
-
--(id) initWithAction: (CCActionInterval*) action
-{
-    NSAssert( action!=nil, @"Ease: arguments must be non-nil");
-    
-    if (self = [super initWithAction: action]) {
-		_polynomialOrder = kDefaultPolynomial;
-        _hasInflection = FALSE;
-        _intersetValue = 1.78179743628068f;
-    }
-    
-    return self;
-}
-
--(void)setPolynomialOrder:(NSUInteger)val {
-    NSAssert(val>1, @"Polynomial order must be greater than 1");
-    _polynomialOrder = val;
-    _hasInflection = (val % 2 > 0);
-    _intersetValue = powf(0.5f, 1.0f / val) / 0.5f;
-}
-
--(NSUInteger)polynomialOrder {
-    return _polynomialOrder;
-}
-@end
-
-//
-// EasePolynomialIn
-//
-@implementation CCEasePolynomialIn
--(void) update: (ccTime) t
-{
-    [_inner update: powf(t, _polynomialOrder)];
-}
-
-- (CCActionInterval*) reverse
-{
-    CCEasePolynomialOut *action = [CCEasePolynomialOut actionWithAction: [_inner reverse]];
-    if (_polynomialOrder != kDefaultPolynomial) {
-        action.polynomialOrder = _polynomialOrder;
-    }
-    
-    return action;
-}
-@end
-
-//
-// EasePolynomialOut
-//
-@implementation CCEasePolynomialOut
--(void) update: (ccTime) t
-{
-    if (_hasInflection) {
-        t = powf(t-1.0f, _polynomialOrder) + 1.0f;
-    } else {
-        t = -powf(t-1.0f, _polynomialOrder) + 1.0f;
-    }
-    
-    [_inner update:t];
-}
-
-- (CCActionInterval*) reverse
-{
-    CCEasePolynomialIn *action = [CCEasePolynomialIn actionWithAction: [_inner reverse]];
-    if (_polynomialOrder != kDefaultPolynomial) {
-        action.polynomialOrder = _polynomialOrder;
-    }
-    
-    return action;
-}
-@end
-
-//
-// EasePolynomialInOut
-//
-@implementation CCEasePolynomialInOut
--(void) update: (ccTime) t
-{
-    if (t < 0.5f) {
-        t = powf(t*_intersetValue, _polynomialOrder);
-    } else {
-        if (_hasInflection) {
-            t = powf((t - 1.0f)*_intersetValue, _polynomialOrder) + 1.0f;
-        } else {
-            t = -powf((t - 1.0f)*_intersetValue, _polynomialOrder) + 1.0f;
-        }
-    }
-    
-    [_inner update:t];
-}
-@end
-
-#pragma mark -
-#pragma mark EaseSin actions
-
-//
-// EaseSineIn
-//
-@implementation CCEaseSineIn
--(void) update: (ccTime) t
-{
-	[_inner update:-1*cosf(t * (float)M_PI_2) +1];
-}
-
-- (CCActionInterval*) reverse
-{
-	return [CCEaseSineOut actionWithAction: [_inner reverse]];
-}
-@end
-
-//
-// EaseSineOut
-//
-@implementation CCEaseSineOut
--(void) update: (ccTime) t
-{
-	[_inner update:sinf(t * (float)M_PI_2)];
-}
-
-- (CCActionInterval*) reverse
-{
-	return [CCEaseSineIn actionWithAction: [_inner reverse]];
-}
-@end
-
-//
-// EaseSineInOut
-//
-@implementation CCEaseSineInOut
--(void) update: (ccTime) t
-{
-	[_inner update:-0.5f*(cosf( (float)M_PI*t) - 1)];
-}
-@end
-
-#pragma mark -
 #pragma mark EaseElastic actions
 
 //
 // EaseElastic
 //
-@implementation CCEaseElastic
+@implementation CCActionEaseElastic
 
 @synthesize period = _period;
 
@@ -424,10 +220,10 @@
 // EaseElasticIn
 //
 
-@implementation CCEaseElasticIn
--(void) update: (ccTime) t
+@implementation CCActionEaseElasticIn
+-(void) update: (CCTime) t
 {
-	ccTime newT = 0;
+	CCTime newT = 0;
 	if (t == 0 || t == 1)
 		newT = t;
 
@@ -441,7 +237,7 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseElasticOut actionWithAction: [_inner reverse] period:_period];
+	return [CCActionEaseElasticOut actionWithAction: [_inner reverse] period:_period];
 }
 
 @end
@@ -449,11 +245,11 @@
 //
 // EaseElasticOut
 //
-@implementation CCEaseElasticOut
+@implementation CCActionEaseElasticOut
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime newT = 0;
+	CCTime newT = 0;
 	if (t == 0 || t == 1) {
 		newT = t;
 
@@ -466,7 +262,7 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseElasticIn actionWithAction: [_inner reverse] period:_period];
+	return [CCActionEaseElasticIn actionWithAction: [_inner reverse] period:_period];
 }
 
 @end
@@ -474,10 +270,10 @@
 //
 // EaseElasticInOut
 //
-@implementation CCEaseElasticInOut
--(void) update: (ccTime) t
+@implementation CCActionEaseElasticInOut
+-(void) update: (CCTime) t
 {
-	ccTime newT = 0;
+	CCTime newT = 0;
 
 	if( t == 0 || t == 1 )
 		newT = t;
@@ -485,7 +281,7 @@
 		t = t * 2;
 		if(! _period )
 			_period = 0.3f * 1.5f;
-		ccTime s = _period / 4;
+		CCTime s = _period / 4;
 
 		t = t -1;
 		if( t < 0 )
@@ -498,7 +294,7 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseElasticInOut actionWithAction: [_inner reverse] period:_period];
+	return [CCActionEaseElasticInOut actionWithAction: [_inner reverse] period:_period];
 }
 
 @end
@@ -509,8 +305,8 @@
 //
 // EaseBounce
 //
-@implementation CCEaseBounce
--(ccTime) bounceTime:(ccTime) t
+@implementation CCActionEaseBounce
+-(CCTime) bounceTime:(CCTime) t
 {
 	if (t < 1 / 2.75) {
 		return 7.5625f * t * t;
@@ -533,11 +329,11 @@
 // EaseBounceIn
 //
 
-@implementation CCEaseBounceIn
+@implementation CCActionEaseBounceIn
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime newT = t;
+	CCTime newT = t;
 	// prevents rounding errors
 	if( t !=0 && t!=1)
 		newT = 1 - [self bounceTime:1-t];
@@ -547,16 +343,16 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseBounceOut actionWithAction: [_inner reverse]];
+	return [CCActionEaseBounceOut actionWithAction: [_inner reverse]];
 }
 
 @end
 
-@implementation CCEaseBounceOut
+@implementation CCActionEaseBounceOut
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime newT = t;
+	CCTime newT = t;
 	// prevents rounding errors
 	if( t !=0 && t!=1)
 		newT = [self bounceTime:t];
@@ -566,16 +362,16 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseBounceIn actionWithAction: [_inner reverse]];
+	return [CCActionEaseBounceIn actionWithAction: [_inner reverse]];
 }
 
 @end
 
-@implementation CCEaseBounceInOut
+@implementation CCActionEaseBounceInOut
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime newT;
+	CCTime newT;
 	// prevents possible rounding errors
 	if( t ==0 || t==1)
 		newT = t;
@@ -595,27 +391,27 @@
 //
 // EaseBackIn
 //
-@implementation CCEaseBackIn
+@implementation CCActionEaseBackIn
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime overshoot = 1.70158f;
+	CCTime overshoot = 1.70158f;
 	[_inner update: t * t * ((overshoot + 1) * t - overshoot)];
 }
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseBackOut actionWithAction: [_inner reverse]];
+	return [CCActionEaseBackOut actionWithAction: [_inner reverse]];
 }
 @end
 
 //
 // EaseBackOut
 //
-@implementation CCEaseBackOut
--(void) update: (ccTime) t
+@implementation CCActionEaseBackOut
+-(void) update: (CCTime) t
 {
-	ccTime overshoot = 1.70158f;
+	CCTime overshoot = 1.70158f;
 
 	t = t - 1;
 	[_inner update: t * t * ((overshoot + 1) * t + overshoot) + 1];
@@ -623,18 +419,18 @@
 
 - (CCActionInterval*) reverse
 {
-	return [CCEaseBackIn actionWithAction: [_inner reverse]];
+	return [CCActionEaseBackIn actionWithAction: [_inner reverse]];
 }
 @end
 
 //
 // EaseBackInOut
 //
-@implementation CCEaseBackInOut
+@implementation CCActionEaseBackInOut
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
-	ccTime overshoot = 1.70158f * 1.525f;
+	CCTime overshoot = 1.70158f * 1.525f;
 
 	t = t * 2;
 	if (t < 1)

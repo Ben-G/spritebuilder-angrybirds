@@ -45,6 +45,8 @@
 #import "kazmath/kazmath.h"
 #import "kazmath/GL/matrix.h"
 
+#import "CCDirector_Private.h"
+
 #pragma mark -
 #pragma mark Director Mac extensions
 
@@ -247,7 +249,7 @@
 	glViewport(offset.x, offset.y, widthAspect, heightAspect);
 }
 
--(void) setProjection:(ccDirectorProjection)projection
+-(void) setProjection:(CCDirectorProjection)projection
 {
 	CGSize size = _winSizeInPixels;
     if( _resizeMode == kCCDirectorResize_AutoScale && ! CGSizeEqualToSize(_originalWinSize, CGSizeZero ) ) {
@@ -257,7 +259,7 @@
 	[self setViewport];
 
 	switch (projection) {
-		case kCCDirectorProjection2D:
+		case CCDirectorProjection2D:
 
 			kmGLMatrixMode(KM_GL_PROJECTION);
 			kmGLLoadIdentity();
@@ -271,7 +273,7 @@
 			break;
 
 
-		case kCCDirectorProjection3D:
+		case CCDirectorProjection3D:
 		{
 
 			float zeye = [self getZEye];
@@ -303,7 +305,7 @@
 			break;
 		}
 
-		case kCCDirectorProjectionCustom:
+		case CCDirectorProjectionCustom:
 			if( [_delegate respondsToSelector:@selector(updateProjection)] )
 				[_delegate updateProjection];
 			break;
@@ -363,6 +365,32 @@
 	return  [(CCDirectorMac*)self convertToLogicalCoordinates:p];
 }
 
+- (CGPoint) unConvertFromLogicalCoordinates:(CGPoint)coords
+{
+	CGPoint ret;
+	
+	if( _resizeMode == kCCDirectorResize_NoScale )
+		ret = coords;
+	
+	else {
+		
+		float x_diff = _originalWinSize.width / (_winSizeInPixels.width - _winOffset.x * 2);
+		float y_diff = _originalWinSize.height / (_winSizeInPixels.height - _winOffset.y * 2);
+		
+		float adjust_x = (_winSizeInPixels.width * x_diff - _originalWinSize.width ) / 2;
+		float adjust_y = (_winSizeInPixels.height * y_diff - _originalWinSize.height ) / 2;
+		
+		ret = CGPointMake(  (coords.x+ adjust_x)/x_diff, (coords.y +adjust_y)/y_diff );
+	}
+	
+	return ret;
+}
+
+- (CGPoint) convertToUI:(CGPoint)glPoint
+{
+	return [self unConvertFromLogicalCoordinates:glPoint];
+}
+
 @end
 
 
@@ -405,7 +433,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 {
 	[super startAnimation];
 	
-    if(_isAnimating)
+    if(_animating)
         return;
 
 	CCLOG(@"cocos2d: startAnimation");
@@ -433,12 +461,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	// Activate the display link
 	CVDisplayLinkStart(displayLink);
     
-    _isAnimating = YES;
+    _animating = YES;
 }
 
 - (void) stopAnimation
 {
-    if(!_isAnimating)
+    if(!_animating)
         return;
 
 	CCLOG(@"cocos2d: stopAnimation");
@@ -457,7 +485,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 #endif
 	}
     
-    _isAnimating = NO;
+    _animating = NO;
 }
 
 -(void) dealloc

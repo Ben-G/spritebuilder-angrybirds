@@ -9,7 +9,7 @@ dependencies: \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCLabelAtlas.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCAtlasNode.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTextureAtlas.h \
-  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexture2D.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTexture.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/CCNS.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCNode.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCProtocols.h \
@@ -26,6 +26,7 @@ dependencies: \
   external/kazmath/include/kazmath/ray2.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCResponder.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCResponderManager.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCScheduler.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCShaderCache.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCGLProgram.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCTextureCache.h \

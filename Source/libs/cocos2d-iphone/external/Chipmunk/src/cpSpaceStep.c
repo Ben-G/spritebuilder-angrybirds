@@ -202,6 +202,21 @@ cpSpaceArbiterSetTrans(cpShape **shapes, cpSpace *space)
 }
 
 static inline cpBool
+QueryRejectConstraint(cpBody *a, cpBody *b)
+{
+	CP_BODY_FOREACH_CONSTRAINT(a, constraint){
+		if(
+			!constraint->collideBodies && (
+				(constraint->a == a && constraint->b == b) ||
+				(constraint->a == b && constraint->b == a)
+			)
+		) return cpTrue;
+	}
+	
+	return cpFalse;
+}
+
+static inline cpBool
 QueryReject(cpShape *a, cpShape *b)
 {
 	return (
@@ -211,8 +226,8 @@ QueryReject(cpShape *a, cpShape *b)
 		|| a->body == b->body
 		// Don't collide shapes that are filtered.
 		|| cpShapeFilterReject(a->filter, b->filter)
-		// Don't collide infinite mass objects unless one of them is a sensor.
-		|| (a->body->m == INFINITY && b->body->m == INFINITY && !(a->sensor || b->sensor))
+		// Don't collide bodies if they have a constraint with collideBodies == cpFalse.
+		|| QueryRejectConstraint(a->body, b->body)
 	);
 }
 
@@ -251,7 +266,9 @@ cpSpaceCollideShapes(cpShape *a, cpShape *b, cpCollisionID id, cpSpace *space)
 		// Check (again) in case the pre-solve() callback called cpArbiterIgnored().
 		arb->state != CP_ARBITER_STATE_IGNORE &&
 		// Process, but don't add collisions for sensors.
-		!(a->sensor || b->sensor)
+		!(a->sensor || b->sensor) &&
+		// Don't process collisions between two infinite mass bodies.
+		!(a->body->m == INFINITY && b->body->m == INFINITY)
 	){
 		cpArrayPush(space->arbiters, arb);
 	} else {

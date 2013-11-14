@@ -23,8 +23,8 @@ dependencies: \
   external/kazmath/include/kazmath/aabb.h \
   external/kazmath/include/kazmath/ray2.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../CCResponder.h \
-  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../CCScene.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../CCScheduler.h \
-  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../Support/uthash.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../CCScene.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/../../CCGLProgram.h \
-  external/kazmath/include/kazmath/GL/matrix.h
+  external/kazmath/include/kazmath/GL/matrix.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCDirector_Private.h

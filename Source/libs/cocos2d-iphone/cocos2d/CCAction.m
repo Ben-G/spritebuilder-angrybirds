@@ -86,12 +86,12 @@
 	return YES;
 }
 
--(void) step: (ccTime) dt
+-(void) step: (CCTime) dt
 {
 	CCLOG(@"[Action step]. override me");
 }
 
--(void) update: (ccTime) time
+-(void) update: (CCTime) time
 {
 	CCLOG(@"[Action update]. override me");
 }
@@ -102,10 +102,10 @@
 //
 #pragma mark -
 #pragma mark FiniteTimeAction
-@implementation CCFiniteTimeAction
+@implementation CCActionFiniteTime
 @synthesize duration = _duration;
 
-- (CCFiniteTimeAction*) reverse
+- (CCActionFiniteTime*) reverse
 {
 	CCLOG(@"cocos2d: FiniteTimeAction#reverse: Implement me");
 	return nil;
@@ -118,7 +118,7 @@
 //
 #pragma mark -
 #pragma mark RepeatForever
-@implementation CCRepeatForever
+@implementation CCActionRepeatForever
 @synthesize innerAction=_innerAction;
 +(id) actionWithAction: (CCActionInterval*) action
 {
@@ -146,11 +146,11 @@
 	[_innerAction startWithTarget:_target];
 }
 
--(void) step:(ccTime) dt
+-(void) step:(CCTime) dt
 {
 	[_innerAction step: dt];
 	if( [_innerAction isDone] ) {
-		ccTime diff = _innerAction.elapsed - _innerAction.duration;
+		CCTime diff = _innerAction.elapsed - _innerAction.duration;
 		[_innerAction startWithTarget:_target];
 
 		// to prevent jerk. issue #390, 1247
@@ -167,7 +167,7 @@
 
 - (CCActionInterval *) reverse
 {
-	return [CCRepeatForever actionWithAction:[_innerAction reverse]];
+	return [CCActionRepeatForever actionWithAction:[_innerAction reverse]];
 }
 @end
 
@@ -176,7 +176,7 @@
 //
 #pragma mark -
 #pragma mark Speed
-@implementation CCSpeed
+@implementation CCActionSpeed
 @synthesize speed=_speed;
 @synthesize innerAction=_innerAction;
 
@@ -213,7 +213,7 @@
 	[super stop];
 }
 
--(void) step:(ccTime) dt
+-(void) step:(CCTime) dt
 {
 	[_innerAction step: dt * _speed];
 }
@@ -225,7 +225,7 @@
 
 - (CCActionInterval *) reverse
 {
-	return [CCSpeed actionWithAction:[_innerAction reverse] speed:_speed];
+	return [CCActionSpeed actionWithAction:[_innerAction reverse] speed:_speed];
 }
 @end
 
@@ -234,7 +234,7 @@
 //
 #pragma mark -
 #pragma mark Follow
-@implementation CCFollow
+@implementation CCActionFollow
 
 @synthesize boundarySet = _boundarySet;
 
@@ -256,7 +256,7 @@
 		_boundarySet = FALSE;
 		_boundaryFullyCovered = FALSE;
 
-		CGSize s = [[CCDirector sharedDirector] winSize];
+		CGSize s = [[CCDirector sharedDirector] viewSize];
 		_fullScreenSize = CGPointMake(s.width, s.height);
 		_halfScreenSize = ccpMult(_fullScreenSize, .5f);
 	}
@@ -272,7 +272,7 @@
 		_boundarySet = TRUE;
 		_boundaryFullyCovered = FALSE;
 
-		CGSize winSize = [[CCDirector sharedDirector] winSize];
+		CGSize winSize = [[CCDirector sharedDirector] viewSize];
 		_fullScreenSize = CGPointMake(winSize.width, winSize.height);
 		_halfScreenSize = ccpMult(_fullScreenSize, .5f);
 
@@ -308,7 +308,7 @@
 	return copy;
 }
 
--(void) step:(ccTime) dt
+-(void) step:(CCTime) dt
 {
 	if(_boundarySet)
 	{
@@ -326,7 +326,7 @@
 
 -(BOOL) isDone
 {
-	return !_followedNode.isRunning;
+	return !_followedNode.runningInActiveScene;
 }
 
 -(void) stop

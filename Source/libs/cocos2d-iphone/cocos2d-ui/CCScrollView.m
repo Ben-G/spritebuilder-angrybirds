@@ -96,7 +96,7 @@
 
 @implementation CCMoveToX
 
--(id) initWithDuration: (ccTime) t positionX: (float) p
+-(id) initWithDuration: (CCTime) t positionX: (float) p
 {
 	if( (self=[super initWithDuration: t]) )
 		_endPosition = p;
@@ -110,7 +110,7 @@
 	_startPos = target.position.x;
 }
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
     CCNode *node = (CCNode*)_target;
     
@@ -132,7 +132,7 @@
 
 @implementation CCMoveToY
 
--(id) initWithDuration: (ccTime) t positionY: (float) p
+-(id) initWithDuration: (CCTime) t positionY: (float) p
 {
 	if( (self=[super initWithDuration: t]) )
 		_endPosition = p;
@@ -146,7 +146,7 @@
 	_startPos = target.position.y;
 }
 
--(void) update: (ccTime) t
+-(void) update: (CCTime) t
 {
     CCNode *node = (CCNode*)_target;
     
@@ -169,7 +169,7 @@
 - (id) init
 {
     self = [self initWithContentNode:[CCNode node]];
-    self.contentSizeType = kCCContentSizeTypeNormalized;
+    self.contentSizeType = CCContentSizeTypeNormalized;
     return self;
 }
 
@@ -182,7 +182,7 @@
     
     // Setup content node
     self.contentSize = CGSizeMake(1, 1);
-    self.contentSizeType = kCCContentSizeTypeNormalized;
+    self.contentSizeType = CCContentSizeTypeNormalized;
     self.contentNode = contentNode;
     
     // Default properties
@@ -206,7 +206,6 @@
     
 #endif
     
-    [self scheduleUpdate];
     self.userInteractionEnabled = YES;
     
     return self;
@@ -233,12 +232,12 @@
 {
     if (flipYCoordinates)
     {
-        _contentNode.positionType = CCPositionTypeMake(kCCPositionUnitPoints, kCCPositionUnitPoints, kCCPositionReferenceCornerTopLeft);
+        _contentNode.positionType = CCPositionTypeMake(CCPositionUnitPoints, CCPositionUnitPoints, CCPositionReferenceCornerTopLeft);
         _contentNode.anchorPoint = ccp(0,1);
     }
     else
     {
-        _contentNode.positionType = CCPositionTypeMake(kCCPositionUnitPoints, kCCPositionUnitPoints, kCCPositionReferenceCornerBottomLeft);
+        _contentNode.positionType = CCPositionTypeMake(CCPositionUnitPoints, CCPositionUnitPoints, CCPositionReferenceCornerBottomLeft);
         _contentNode.anchorPoint = ccp(0,0);
     }
     
@@ -376,9 +375,9 @@
             _animatingX = YES;
             
             // Create animation action
-            CCActionInterval* action = [CCEaseOut actionWithAction:[[CCMoveToX alloc] initWithDuration:duration positionX:-newPos.x] rate:2];
-            CCCallFunc* callFunc = [CCCallFunc actionWithTarget:self selector:@selector(xAnimationDone)];
-            action = [CCSequence actions:action, callFunc, nil];
+            CCActionInterval* action = [CCActionEaseOut actionWithAction:[[CCMoveToX alloc] initWithDuration:duration positionX:-newPos.x] rate:2];
+            CCActionCallFunc* callFunc = [CCActionCallFunc actionWithTarget:self selector:@selector(xAnimationDone)];
+            action = [CCActionSequence actions:action, callFunc, nil];
             action.tag = kCCScrollViewActionXTag;
             [_contentNode runAction:action];
         }
@@ -390,9 +389,9 @@
             _animatingY = YES;
             
             // Create animation action
-            CCActionInterval* action = [CCEaseOut actionWithAction:[[CCMoveToY alloc] initWithDuration:duration positionY:-newPos.y] rate:2];
-            CCCallFunc* callFunc = [CCCallFunc actionWithTarget:self selector:@selector(yAnimationDone)];
-            action = [CCSequence actions:action, callFunc, nil];
+            CCActionInterval* action = [CCActionEaseOut actionWithAction:[[CCMoveToY alloc] initWithDuration:duration positionY:-newPos.y] rate:2];
+            CCActionCallFunc* callFunc = [CCActionCallFunc actionWithTarget:self selector:@selector(yAnimationDone)];
+            action = [CCActionSequence actions:action, callFunc, nil];
             action.tag = kCCScrollViewActionYTag;
             [_contentNode runAction:action];
             
@@ -458,7 +457,7 @@
     _contentNode.position = ccpMult(newPos, -1);
 }
 
-- (void) update:(ccTime)df
+- (void) update:(CCTime)df
 {
     float fps = 1.0/df;
     float p = 60/fps;
@@ -726,6 +725,8 @@
     [recognizers insertObject:_tapRecognizer atIndex:0];
     
     view.gestureRecognizers = recognizers;
+    
+    [super onEnterTransitionDidFinish];
 }
 
 - (void) onExitTransitionDidStart
@@ -738,6 +739,8 @@
     [recognizers removeObject:_tapRecognizer];
     
     view.gestureRecognizers = recognizers;
+    
+    [super onExitTransitionDidStart];
 }
 
 #elif defined(__CC_PLATFORM_MAC)

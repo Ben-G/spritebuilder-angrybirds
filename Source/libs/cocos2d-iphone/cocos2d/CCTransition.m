@@ -26,6 +26,7 @@
  */
 
 #import "CCTransition.h"
+#import "CCDirector_Private.h"
 
 // -----------------------------------------------------------------
 
@@ -109,7 +110,7 @@ typedef NS_ENUM(NSInteger, CCTransitionFixedFunction)
     _outgoingOverIncoming = NO;
     
     // find out where the outgoing scene will end (if it is a transition with movement)
-    CGSize size = [CCDirector sharedDirector].winSize;
+    CGSize size = [CCDirector sharedDirector].viewSize;
     switch (direction) {
         case CCTransitionDirectionDown: _outgoingDestination = CGPointMake(0, -size.height); break;
         case CCTransitionDirectionLeft: _outgoingDestination = CGPointMake(-size.width, 0); break;
@@ -161,7 +162,7 @@ typedef NS_ENUM(NSInteger, CCTransitionFixedFunction)
     _runTime = 0.0f;
     _progress = 0.0f;
     
-    _transitionPixelFormat = kCCTexture2DPixelFormat_RGB565;
+    _transitionPixelFormat = CCTexturePixelFormat_RGB565;
     
     // disable touch during transition
     self.userInteractionEnabled = NO;
@@ -181,7 +182,7 @@ typedef NS_ENUM(NSInteger, CCTransitionFixedFunction)
 
     // create render textures
     // get viewport size
-    CGSize size = [CCDirector sharedDirector].winSize;
+    CGSize size = [CCDirector sharedDirector].viewSize;
 
     // create texture for outgoing scene
     _outgoingTexture = [CCRenderTexture renderTextureWithWidth:size.width / _outgoingDownScale
@@ -217,23 +218,7 @@ typedef NS_ENUM(NSInteger, CCTransitionFixedFunction)
 
 // -----------------------------------------------------------------
 
-- (void)onEnter
-{
-    [super onEnter];
-    // shedule update for transition
-    [self scheduleUpdate];
-}
-
-- (void)onExit
-{
-    // clean up
-    [self unscheduleUpdate];
-    [super onExit];
-}
-
-// -----------------------------------------------------------------
-
-- (void)update:(ccTime)delta
+- (void)update:(CCTime)delta
 {
     // update progress
     _runTime += delta;
@@ -246,6 +231,9 @@ typedef NS_ENUM(NSInteger, CCTransitionFixedFunction)
         [_outgoingScene onExit];
         [[CCDirector sharedDirector] replaceScene:_incomingScene];
         [_incomingScene onEnterTransitionDidFinish];
+        
+        // mark new scene as dirty, to make sure responder manager is updated
+        [[[CCDirector sharedDirector] responderManager] markAsDirty];
         
         // release scenes
         _incomingScene = nil;

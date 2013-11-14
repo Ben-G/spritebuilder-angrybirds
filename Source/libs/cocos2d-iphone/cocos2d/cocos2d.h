@@ -39,8 +39,8 @@
  */
 
 // 0x00 HI ME LO
-// 00   02 05 00
-#define COCOS2D_VERSION 0x00020500
+// 00   03 00 00
+#define COCOS2D_VERSION 0x00030000
 
 
 //
@@ -48,22 +48,18 @@
 //
 #import "ccConfig.h"	// should be included first
 
-#import "CCActionManager.h"
+//#import "CCActionManager.h"
 #import "CCAction.h"
 #import "CCActionInstant.h"
 #import "CCActionInterval.h"
 #import "CCActionEase.h"
 #import "CCActionTween.h"
 #import "CCActionEase.h"
-#import "CCActionTiledGrid.h"
-#import "CCActionGrid3D.h"
-#import "CCActionGrid.h"
 #import "CCActionProgressTimer.h"
-#import "CCActionPageTurn3D.h"
 #import "CCActionCatmullRom.h"
 
-#import "CCAnimation.h"
-#import "CCAnimationCache.h"
+//#import "CCAnimation.h"
+//#import "CCAnimationCache.h"
 #import "CCSprite.h"
 #import "CCSpriteFrame.h"
 #import "CCSpriteBatchNode.h"
@@ -72,39 +68,34 @@
 
 #import "CCLabelTTF.h"
 #import "CCLabelBMFont.h"
-#import "CCLabelAtlas.h"
+//#import "CCLabelAtlas.h"
 
 #import "CCParticleSystem.h"
 #import "CCParticleSystemQuad.h"
 #import "CCParticleExamples.h"
 #import "CCParticleBatchNode.h"
 
-#import "CCTexture2D.h"
+#import "CCTexture.h"
 #import "CCTexturePVR.h"
-#import "CCTextureCache.h"
-#import "CCTextureAtlas.h"
+//#import "CCTextureCache.h"
+//#import "CCTextureAtlas.h"
 
 #import "CCTransition.h"
 
-#import "CCTMXTiledMap.h"
-#import "CCTMXLayer.h"
-#import "CCTMXObjectGroup.h"
+#import "CCTiledMap.h"
+#import "CCTiledMapLayer.h"
+#import "CCTiledMapObjectGroup.h"
 #import "CCTMXXMLParser.h"
-#import "CCTileMapAtlas.h"
 
 #import "CCLayer.h"
-#import "CCMenu.h"
-#import "CCMenuItem.h"
 #import "CCDrawingPrimitives.h"
 #import "CCScene.h"
-#import "CCScheduler.h"
+//#import "CCScheduler.h"
 #import "CCProtocols.h"
 #import "CCNode.h"
 #import "CCNode+Debug.h"
 #import "CCDirector.h"
 #import "CCAtlasNode.h"
-#import "CCGrabber.h"
-#import "CCGrid.h"
 #import "CCParallaxNode.h"
 #import "CCRenderTexture.h"
 #import "CCMotionStreak.h"
@@ -112,7 +103,11 @@
 #import "CCDrawNode.h"
 #import "CCClippingNode.h"
 
-#import "ccFPSImages.h"
+//#import "ccFPSImages.h"
+
+// Layouts
+#import "CCLayout.h"
+#import "CCLayoutBox.h"
 
 // Shaders
 #import "CCGLProgram.h"
@@ -122,6 +117,7 @@
 
 // Physics
 #import "CCPhysicsBody.h"
+#import "CCPhysicsShape.h"
 #import "CCPhysicsJoint.h"
 #import "CCPhysicsNode.h"
 
@@ -143,11 +139,13 @@
 #ifdef __CC_PLATFORM_IOS
 #import "Platforms/iOS/CCGLView.h"
 #import "Platforms/iOS/CCDirectorIOS.h"
+#import "Platforms/iOS/UITouch+CC.h"
 
 #elif defined(__CC_PLATFORM_MAC)
 #import "Platforms/Mac/CCGLView.h"
 #import "Platforms/Mac/CCDirectorMac.h"
 #import "Platforms/Mac/CCWindow.h"
+#import "Platforms/Mac/NSEvent+CC.h"
 #endif
 
 //

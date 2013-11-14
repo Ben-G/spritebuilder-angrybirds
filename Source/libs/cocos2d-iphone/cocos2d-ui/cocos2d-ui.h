@@ -27,3 +27,6 @@
 #import "CCButton.h"
 #import "CCScrollView.h"
 #import "CCTableView.h"
+
+// CCBReader
+#import "CCBuilderReader.h"

@@ -33,7 +33,6 @@
 #import "CCTextureAtlas.h"
 #import "ccConfig.h"
 #import "ccMacros.h"
-#import "CCGrid.h"
 #import "Support/CGPointExtension.h"
 #import "CCParticleSystem.h"
 #import "CCParticleSystem.h"
@@ -46,6 +45,11 @@
 #import "Support/CCFileUtils.h"
 
 #import "kazmath/GL/matrix.h"
+
+#import "CCNode_Private.h"
+#import "CCParticleSystem_Private.h"
+
+#import "CCTexture_Private.h"
 
 #define kCCParticleDefaultCapacity 500
 
@@ -69,12 +73,12 @@
 /*
  * creation with CCTexture2D
  */
-+(id)batchNodeWithTexture:(CCTexture2D *)tex
++(id)batchNodeWithTexture:(CCTexture *)tex
 {
 	return [[self alloc] initWithTexture:tex capacity:kCCParticleDefaultCapacity];
 }
 
-+(id)batchNodeWithTexture:(CCTexture2D *)tex capacity:(NSUInteger) capacity
++(id)batchNodeWithTexture:(CCTexture *)tex capacity:(NSUInteger) capacity
 {
 	return [[self alloc] initWithTexture:tex capacity:capacity];
 }
@@ -95,7 +99,7 @@
 /*
  * init with CCTexture2D
  */
--(id)initWithTexture:(CCTexture2D *)tex capacity:(NSUInteger)capacity
+-(id)initWithTexture:(CCTexture *)tex capacity:(NSUInteger)capacity
 {
 	if (self = [super init])
 	{
@@ -118,13 +122,13 @@
  */
 -(id)initWithFile:(NSString *)fileImage capacity:(NSUInteger)capacity
 {
-	CCTexture2D *tex = [[CCTextureCache sharedTextureCache] addImage:fileImage];
+	CCTexture *tex = [[CCTextureCache sharedTextureCache] addImage:fileImage];
 	return [self initWithTexture:tex capacity:capacity];
 }
 
 -(NSString*) description
 {
-	return [NSString stringWithFormat:@"<%@ = %p | Tag = %ld>", [self class], self, (long)_tag ];
+	return [NSString stringWithFormat:@"<%@ = %p | Tag = %@>", [self class], self, _name ];
 }
 
 
@@ -146,17 +150,9 @@
 
 	kmGLPushMatrix();
 
-	if ( _grid && _grid.active) {
-		[_grid beforeDraw];
-		[self transformAncestors];
-	}
-
 	[self transform];
 
 	[self draw];
-
-	if ( _grid && _grid.active)
-		[_grid afterDraw:self];
 
 	kmGLPopMatrix();
 }
@@ -195,7 +191,7 @@
 // XXX research whether lazy sorting + freeing current quads and calloc a new block with size of capacity would be faster
 // XXX or possibly using vertexZ for reordering, that would be fastest
 // this helper is almost equivalent to CCNode's addChild, but doesn't make use of the lazy sorting
--(NSUInteger) addChildHelper: (CCNode*) child z:(NSInteger)z tag:(NSInteger) aTag
+-(NSUInteger) addChildHelper: (CCNode*) child z:(NSInteger)z name:(NSString*) name
 {
 	NSAssert( child != nil, @"Argument must be non-nil");
 	NSAssert( child.parent == nil, @"child already added. It can't be added again");
@@ -208,12 +204,12 @@
 
 	[_children insertObject:child atIndex:pos];
 
-	child.tag = aTag;
+	child.name = name;
 	[child _setZOrder:z];
 
 	[child setParent: self];
 
-	if( _isRunning ) {
+	if( _isInActiveScene ) {
 		[child onEnter];
 		[child onEnterTransitionDidFinish];
 	}
@@ -446,7 +442,7 @@
 	}
 }
 
--(void) setTexture:(CCTexture2D*)texture
+-(void) setTexture:(CCTexture*)texture
 {
 	_textureAtlas.texture = texture;
 
@@ -458,7 +454,7 @@
 	}
 }
 
--(CCTexture2D*) texture
+-(CCTexture*) texture
 {
 	return _textureAtlas.texture;
 }

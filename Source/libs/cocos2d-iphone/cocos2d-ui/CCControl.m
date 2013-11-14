@@ -23,6 +23,7 @@
  */
 
 #import "CCControl.h"
+#import "CCControlSubclass.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
@@ -49,6 +50,7 @@
     if (!self) return NULL;
     
     self.userInteractionEnabled = YES;
+    self.exclusiveTouch = YES;
     
     return self;
 }
@@ -130,6 +132,7 @@
     
     if (_touchInside)
     {
+        [self touchUpOutside:touch withEvent:event];
         [self touchExited:touch withEvent:event];
     }
     

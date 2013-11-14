@@ -28,6 +28,16 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       buildConfiguration = "Debug">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D35C0BF11808637C0071B674"
+               BuildableName = "CCPhysicsTests.xctest"
+               BlueprintName = "CCPhysicsTests"
+               ReferencedContainer = "container:cocos2d-tests-ios.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

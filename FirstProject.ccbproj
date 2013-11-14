@@ -155,8 +155,8 @@
 	<key>tabletPositionScaleFactorType</key>
 	<integer>0</integer>
 	<key>versionStr</key>
-	<string>Version: 0.8
-GitHub: 1961485b4a
+	<string>Version: 0.9.alpha
+GitHub: a60fad70ec
 </string>
 </dict>
 </plist>

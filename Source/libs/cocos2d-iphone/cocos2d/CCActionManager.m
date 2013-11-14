@@ -48,6 +48,11 @@
 	return self;
 }
 
+-(NSInteger)priority
+{
+	return NSIntegerMin;
+}
+
 - (NSString*) description
 {
 	return [NSString stringWithFormat:@"<%@ = %p>", [self class], self];
@@ -302,7 +307,7 @@
 
 #pragma mark ActionManager - main loop
 
--(void) update: (ccTime) dt
+-(void) update: (CCTime) dt
 {
 	for(tHashElement *elt = targets; elt != NULL; ) {
 

@@ -77,13 +77,13 @@ enum {
 //! IMPORTANT: You should never call "[action stop]" manually. Instead, use: "[target stopAction:action];"
 -(void) stop;
 //! called every frame with its delta time. DON'T override unless you know what you are doing.
--(void) step: (ccTime) dt;
+-(void) step: (CCTime) dt;
 //! called once per frame. time a value between 0 and 1
 //! For example:
 //! * 0 means that the action just started
 //! * 0.5 means that the action is in the middle
 //! * 1 means that the action is over
--(void) update: (ccTime) time;
+-(void) update: (CCTime) time;
 
 @end
 
@@ -93,16 +93,16 @@ enum {
    - An action with a duration of 35.5 seconds
  Infinite time actions are valid
  */
-@interface CCFiniteTimeAction : CCAction <NSCopying>
+@interface CCActionFiniteTime : CCAction <NSCopying>
 {
 	//! duration in seconds
-	ccTime _duration;
+	CCTime _duration;
 }
 //! duration in seconds of the action
-@property (nonatomic,readwrite) ccTime duration;
+@property (nonatomic,readwrite) CCTime duration;
 
 /** returns a reversed action */
-- (CCFiniteTimeAction*) reverse;
+- (CCActionFiniteTime*) reverse;
 @end
 
 
@@ -111,7 +111,7 @@ enum {
  To repeat the an action for a limited number of times use the Repeat action.
  @warning This action can't be Sequence-able because it is not an IntervalAction
  */
-@interface CCRepeatForever : CCAction <NSCopying>
+@interface CCActionRepeatForever : CCAction <NSCopying>
 {
 	CCActionInterval *_innerAction;
 }
@@ -129,7 +129,7 @@ enum {
  Useful to simulate 'slow motion' or 'fast forward' effect.
  @warning This action can't be Sequence-able because it is not an CCIntervalAction
  */
-@interface CCSpeed : CCAction <NSCopying>
+@interface CCActionSpeed : CCAction <NSCopying>
 {
 	CCActionInterval	*_innerAction;
 	CGFloat _speed;
@@ -154,7 +154,7 @@ enum {
  Instead of using CCCamera as a "follower", use this action instead.
  @since v0.99.2
  */
-@interface CCFollow : CCAction <NSCopying>
+@interface CCActionFollow : CCAction <NSCopying>
 {
 	/* node to follow */
 	CCNode	*_followedNode;

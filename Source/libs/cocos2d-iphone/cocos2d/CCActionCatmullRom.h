@@ -80,7 +80,7 @@
 /** Cardinal Spline path.
  http://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
  */
-@interface CCCardinalSplineTo : CCActionInterval
+@interface CCActionCardinalSplineTo : CCActionInterval
 {
 	CCPointArray	*_points;
 	CGFloat			_deltaT;
@@ -93,17 +93,17 @@
  @property (nonatomic,readwrite,strong) CCPointArray *points;
 
 /** creates an action with a Cardinal Spline array of points and tension */
-+(id) actionWithDuration:(ccTime)duration points:(CCPointArray*)points tension:(CGFloat)tension;
++(id) actionWithDuration:(CCTime)duration points:(CCPointArray*)points tension:(CGFloat)tension;
 
 /** initializes the action with a duration and an array of points */
--(id) initWithDuration:(ccTime)duration points:(CCPointArray*)points tension:(CGFloat)tension;
+-(id) initWithDuration:(CCTime)duration points:(CCPointArray*)points tension:(CGFloat)tension;
 
 @end
 
 /** Cardinal Spline path.
  http://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
  */
-@interface CCCardinalSplineBy : CCCardinalSplineTo
+@interface CCCardinalSplineBy : CCActionCardinalSplineTo
 {
 	CGPoint		_startPosition;
 }
@@ -115,28 +115,28 @@
  A Catmull Rom is a Cardinal Spline with a tension of 0.5.
  http://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
  */
-@interface CCCatmullRomTo : CCCardinalSplineTo
+@interface CCActionCatmullRomTo : CCActionCardinalSplineTo
 {
 }
 /** creates an action with a Cardinal Spline array of points and tension */
-+(id) actionWithDuration:(ccTime)dt points:(CCPointArray*)points;
++(id) actionWithDuration:(CCTime)dt points:(CCPointArray*)points;
 
 /** initializes the action with a duration and an array of points */
--(id) initWithDuration:(ccTime)dt points:(CCPointArray*)points;
+-(id) initWithDuration:(CCTime)dt points:(CCPointArray*)points;
 @end
 
 /** An action that moves the target with a CatmullRom curve by a certain distance.
   A Catmull Rom is a Cardinal Spline with a tension of 0.5.
  http://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
  */
-@interface CCCatmullRomBy : CCCardinalSplineBy
+@interface CCActionCatmullRomBy : CCCardinalSplineBy
 {
 }
 /** creates an action with a Cardinal Spline array of points and tension */
-+(id) actionWithDuration:(ccTime)dt points:(CCPointArray*)points;
++(id) actionWithDuration:(CCTime)dt points:(CCPointArray*)points;
 
 /** initializes the action with a duration and an array of points */
--(id) initWithDuration:(ccTime)dt points:(CCPointArray*)points;
+-(id) initWithDuration:(CCTime)dt points:(CCPointArray*)points;
 @end
 
 #ifdef __cplusplus
@@ -144,7 +144,7 @@ extern "C" {
 #endif
 
 /** Returns the Cardinal Spline position for a given set of control points, tension and time */
-CGPoint ccCardinalSplineAt( CGPoint p0, CGPoint p1, CGPoint p2, CGPoint p3, CGFloat tension, ccTime t );
+CGPoint CCCardinalSplineAt( CGPoint p0, CGPoint p1, CGPoint p2, CGPoint p3, CGFloat tension, CCTime t );
 
 #ifdef __cplusplus
 }

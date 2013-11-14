@@ -23,9 +23,12 @@
  */
 
 #import "CCButton.h"
+#import "CCControlSubclass.h"
 
 #import "cocos2d.h"
 #import <objc/runtime.h>
+
+#define kCCFatFingerExpansion 70
 
 @implementation CCButton
 
@@ -121,8 +124,8 @@
     // Setup label
     _label = [CCLabelTTF labelWithString:title fontName:@"Helvetica" fontSize:14];
     _label.adjustsFontSizeToFit = YES;
-    _label.horizontalAlignment = kCCTextAlignmentCenter;
-    _label.verticalAlignment = kCCVerticalTextAlignmentCenter;
+    _label.horizontalAlignment = CCTextAlignmentCenter;
+    _label.verticalAlignment = CCVerticalTextAlignmentCenter;
     
     [self addChild:_label z:1];
     
@@ -175,7 +178,7 @@
     _background.anchorPoint = ccp(0,0);
     _background.position = ccp(0,0);
     
-    _label.positionType = kCCPositionTypeNormalized;
+    _label.positionType = CCPositionTypeNormalized;
     _label.position = ccp(0.5f, 0.5f);
     
     self.contentSize = [self convertContentSizeFromPoints: size type:self.contentSizeType];
@@ -186,6 +189,15 @@
 
 - (void) touchEntered:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    if (!self.enabled)
+    {
+        return;
+    }
+    
+    if (self.claimsUserInteraction)
+    {
+        [super setHitAreaExpansion:_originalHitAreaExpansion + kCCFatFingerExpansion];
+    }
     self.highlighted = YES;
 }
 
@@ -196,12 +208,19 @@
 
 - (void) touchUpInside:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    [self triggerAction];
+    [super setHitAreaExpansion:_originalHitAreaExpansion];
+    
+    if (self.enabled)
+    {
+        [self triggerAction];
+    }
+    
     self.highlighted = NO;
 }
 
 - (void) touchUpOutside:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    [super setHitAreaExpansion:_originalHitAreaExpansion];
     self.highlighted = NO;
 }
 
@@ -209,6 +228,10 @@
 
 - (void) mouseDownEntered:(NSEvent *)event
 {
+    if (!self.enabled)
+    {
+        return;
+    }
     self.highlighted = YES;
 }
 
@@ -219,7 +242,10 @@
 
 - (void) mouseUpInside:(NSEvent *)event
 {
-    [self triggerAction];
+    if (self.enabled)
+    {
+        [self triggerAction];
+    }
     self.highlighted = NO;
 }
 
@@ -229,6 +255,17 @@
 }
 
 #endif
+
+- (void) triggerAction
+{
+    // Handle toggle buttons
+    if (self.togglesSelectedState)
+    {
+        self.selected = !self.selected;
+    }
+    
+    [super triggerAction];
+}
 
 - (void) updatePropertiesForState:(CCControlState)state
 {
@@ -258,12 +295,19 @@
             
             if (_zoomWhenHighlighted)
             {
-                [_label runAction:[CCScaleTo actionWithDuration:0.1 scaleX:_originalScaleX*1.2 scaleY:_originalScaleY*1.2]];
+                [_label runAction:[CCActionScaleTo actionWithDuration:0.1 scaleX:_originalScaleX*1.2 scaleY:_originalScaleY*1.2]];
             }
         }
         else
         {
-            [self updatePropertiesForState:CCControlStateNormal];
+            if (self.selected)
+            {
+                [self updatePropertiesForState:CCControlStateSelected];
+            }
+            else
+            {
+                [self updatePropertiesForState:CCControlStateNormal];
+            }
             
             [_label stopAllActions];
             if (_zoomWhenHighlighted)
@@ -281,6 +325,17 @@
 }
 
 #pragma mark Properties
+
+- (void) setHitAreaExpansion:(float)hitAreaExpansion
+{
+    _originalHitAreaExpansion = hitAreaExpansion;
+    [super hitAreaExpansion];
+}
+
+- (float) hitAreaExpansion
+{
+    return _originalHitAreaExpansion;
+}
 
 - (void) setScale:(float)scale
 {

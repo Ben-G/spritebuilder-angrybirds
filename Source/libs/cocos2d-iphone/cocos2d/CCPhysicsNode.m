@@ -55,13 +55,8 @@ static inline void NYI(){@throw @"Not Yet Implemented";}
 // Check that the arbiter is set and return it.
 -(cpArbiter *)arb
 {
-	NSAssert(_arbiter, @"Do not store references to CCPhysicsCollisionPair objects.");
+	NSAssert(_arbiter, @"This CCPhysicsCollisionPair has been invalidated. Do not store references to CCPhysicsCollisionPair objects.");
 	return _arbiter;
-}
-
--(BOOL)ignore
-{
-	return cpArbiterIgnore(self.arb);
 }
 
 -(CGFloat)friction {return cpArbiterGetFriction(self.arb);}
@@ -78,6 +73,18 @@ static inline void NYI(){@throw @"Not Yet Implemented";}
 
 -(id)userData {return cpArbiterGetUserData(self.arb);}
 -(void)setUserData:(id)userData {cpArbiterSetUserData(self.arb, userData);}
+
+-(void)shapeA:(CCPhysicsShape *__autoreleasing *)shapeA shapeB:(CCPhysicsShape *__autoreleasing *)shapeB
+{
+	CHIPMUNK_ARBITER_GET_SHAPES(self.arb, a, b)
+	(*shapeA) = a.userData;
+	(*shapeB) = b.userData;
+}
+
+-(BOOL)ignore
+{
+	return cpArbiterIgnore(self.arb);
+}
 
 @end
 
@@ -125,12 +132,12 @@ static inline void NYI(){@throw @"Not Yet Implemented";}
 }
 
 static cpBool PhysicsBegin(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHandler *handler){
-	CHIPMUNK_ARBITER_GET_SHAPES(arb, bodyA, bodyB);
+	CHIPMUNK_ARBITER_GET_BODIES(arb, bodyA, bodyB);
 	CCPhysicsCollisionPair *pair = handler->_collisionPairSingleton;
 	pair->_arbiter = arb;
 	
 	cpBool (*imp)(id, SEL, id, id, id) = (__typeof(imp))handler->_beginImp;
-	BOOL retval = imp(handler->_delegate, handler->_beginSel, pair, bodyA.userData, bodyB.userData);
+	BOOL retval = imp(handler->_delegate, handler->_beginSel, pair, [bodyA.userData node], [bodyB.userData node]);
 	
 	if(!handler->_wildcard){
 		retval = cpArbiterCallWildcardBeginA(arb, space) && retval;
@@ -150,12 +157,12 @@ static cpBool PhysicsBegin(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHan
 }
 
 static cpBool PhysicsPreSolve(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHandler *handler){
-	CHIPMUNK_ARBITER_GET_SHAPES(arb, bodyA, bodyB);
+	CHIPMUNK_ARBITER_GET_BODIES(arb, bodyA, bodyB);
 	CCPhysicsCollisionPair *pair = handler->_collisionPairSingleton;
 	pair->_arbiter = arb;
 	
 	cpBool (*imp)(id, SEL, id, id, id) = (__typeof(imp))handler->_preSolveImp;
-	BOOL retval = imp(handler->_delegate, handler->_preSolveSel, pair, bodyA.userData, bodyB.userData);
+	BOOL retval = imp(handler->_delegate, handler->_preSolveSel, pair, [bodyA.userData node], [bodyB.userData node]);
 	
 	if(!handler->_wildcard){
 		retval = cpArbiterCallWildcardPreSolveA(arb, space) && retval;
@@ -175,12 +182,12 @@ static cpBool PhysicsPreSolve(cpArbiter *arb, cpSpace *space, CCPhysicsCollision
 }
 
 static void PhysicsPostSolve(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHandler *handler){
-	CHIPMUNK_ARBITER_GET_SHAPES(arb, bodyA, bodyB);
+	CHIPMUNK_ARBITER_GET_BODIES(arb, bodyA, bodyB);
 	CCPhysicsCollisionPair *pair = handler->_collisionPairSingleton;
 	pair->_arbiter = arb;
 	
 	void (*imp)(id, SEL, id, id, id) = (__typeof(imp))handler->_postSolveImp;
-	imp(handler->_delegate, handler->_postSolveSel, pair, bodyA.userData, bodyB.userData);
+	imp(handler->_delegate, handler->_postSolveSel, pair, [bodyA.userData node], [bodyB.userData node]);
 	
 	if(!handler->_wildcard){
 		cpArbiterCallWildcardPostSolveA(arb, space);
@@ -198,12 +205,12 @@ static void PhysicsPostSolve(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionH
 }
 
 static void PhysicsSeparate(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHandler *handler){
-	CHIPMUNK_ARBITER_GET_SHAPES(arb, bodyA, bodyB);
+	CHIPMUNK_ARBITER_GET_BODIES(arb, bodyA, bodyB);
 	CCPhysicsCollisionPair *pair = handler->_collisionPairSingleton;
 	pair->_arbiter = arb;
 	
 	void (*imp)(id, SEL, id, id, id) = (__typeof(imp))handler->_separateImp;
-	imp(handler->_delegate, handler->_separateSel, pair, bodyA.userData, bodyB.userData);
+	imp(handler->_delegate, handler->_separateSel, pair, [bodyA.userData node], [bodyB.userData node]);
 	
 	if(!handler->_wildcard){
 		cpArbiterCallWildcardSeparateA(arb, space);
@@ -250,7 +257,7 @@ static void PhysicsSeparate(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHa
 	
 	// CCDrawNode used for drawing the debug overlay.
 	// Only allocated if CCPhysicsNode.debugDraw is YES.
-	CCDrawNode *_debug;
+	CCDrawNode *_debugDraw;
 }
 
 // Used by CCNode.physicsNode
@@ -273,9 +280,6 @@ static void PhysicsSeparate(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHa
 		
 		_collisionPairSingleton = [[CCPhysicsCollisionPair alloc] init];
 		_handlers = [NSMutableSet set];
-		
-		_debug = [CCDrawNode node];
-		[self addChild:_debug z:NSIntegerMax];
 	}
 	
 	return self;
@@ -284,8 +288,8 @@ static void PhysicsSeparate(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHa
 -(CGPoint)gravity {return _space.gravity;}
 -(void)setGravity:(CGPoint)gravity {_space.gravity = gravity;}
 
--(ccTime)sleepTimeThreshold {return _space.sleepTimeThreshold;}
--(void)setSleepTimeThreshold:(ccTime)sleepTimeThreshold {_space.sleepTimeThreshold = sleepTimeThreshold;}
+-(CCTime)sleepTimeThreshold {return _space.sleepTimeThreshold;}
+-(void)setSleepTimeThreshold:(CCTime)sleepTimeThreshold {_space.sleepTimeThreshold = sleepTimeThreshold;}
 
 // Collision Delegates
 
@@ -364,53 +368,61 @@ static void PhysicsSeparate(cpArbiter *arb, cpSpace *space, CCPhysicsCollisionHa
 
 //MARK: Queries:
 
--(CCPhysicsBody *)pointQueryAt:(CGPoint)point within:(CGFloat)radius block:(BOOL (^)(CCPhysicsBody *, CGPoint, CGFloat))block
+-(void)pointQueryAt:(CGPoint)point within:(CGFloat)radius block:(BOOL (^)(CCPhysicsShape *, CGPoint, CGFloat))block
 {
-	NYI();
-	return nil;
+	cpSpacePointQuery_b(_space.space, point, radius, CP_SHAPE_FILTER_ALL, ^(cpShape *shape, CGPoint p, CGFloat d, CGPoint g){
+		block([cpShapeGetUserData(shape) userData], p, d);
+	});
 }
 
--(CCPhysicsBody *)rayQueryFirstFrom:(CGPoint)start to:(CGPoint)end block:(BOOL (^)(CCPhysicsBody *, CGPoint, CGPoint, CGFloat))block
+-(void)rayQueryFirstFrom:(CGPoint)start to:(CGPoint)end block:(BOOL (^)(CCPhysicsShape *, CGPoint, CGPoint, CGFloat))block
 {
-	NYI();
-	return nil;
+	cpSpaceSegmentQuery_b(_space.space, start, end, 0.0, CP_SHAPE_FILTER_ALL, ^(cpShape *shape, CGPoint p, CGPoint n, CGFloat t){
+		block([cpShapeGetUserData(shape) userData], p, n, t);
+	});
 }
 
--(BOOL)rectQuery:(CGRect)rect block:(BOOL (^)(CCPhysicsBody *))block
+-(void)rectQuery:(CGRect)rect block:(BOOL (^)(CCPhysicsShape *shape))block
 {
-	NYI();
-	return NO;
+	cpBB bb = cpBBNew(
+		CGRectGetMinX(rect),
+		CGRectGetMinY(rect),
+		CGRectGetMaxX(rect),
+		CGRectGetMaxY(rect)
+	);
+	
+	cpSpaceBBQuery_b(_space.space, bb, CP_SHAPE_FILTER_ALL, ^(cpShape *shape){
+		block([cpShapeGetUserData(shape) userData]);
+	});
 }
 
-//MARK: Lifecycle and Scheduling
+//MARK: Time Stepping
 
--(void)onEnter
+-(NSInteger)priority
 {
-	[super onEnter];
-	[self scheduleUpdate];
+	return NSIntegerMax;
 }
 
--(void)onExit
+-(void)fixedUpdate:(CCTime)delta
 {
-	[super onExit];
-	[self unscheduleUpdate];
-}
-
--(void)fixedUpdate:(ccTime)delta
-{
-	[_space step:1.0f/60.0f];
+	[_space step:delta];
 	
 	// Null out the arbiter just in case somebody retained a pair.
 	_collisionPairSingleton->_arbiter = NULL;
 }
 
--(void)update:(ccTime)delta
-{
-	// TODO need a real fixed time step here.
-	[self fixedUpdate:1.0/60.0];
-}
-
 //MARK: Debug Drawing:
+
+-(BOOL)debugDraw {return (_debugDraw != nil);}
+-(void)setDebugDraw:(BOOL)debugDraw
+{
+	if(debugDraw){
+		_debugDraw = [CCDrawNode node];
+		[self addChild:_debugDraw z:NSIntegerMax];
+	} else {
+		[_debugDraw removeFromParent];
+	}
+}
 
 static inline ccColor4F ToCCColor4f(cpSpaceDebugColor c){return (ccColor4F){c.r, c.g, c.b, c.a};}
 
@@ -455,19 +467,16 @@ ColorForShape(cpShape *shape, CCDrawNode *draw)
 		(cpSpaceDebugDrawColorForShapeImpl)ColorForShape,
 		{0.0, 1.0, 0.0, 1.0},
 		{1.0, 0.0, 0.0, 1.0},
-		_debug,
+		_debugDraw,
 	};
 	
-	[_debug clear];
+	[_debugDraw clear];
 	cpSpaceDebugDraw(_space.space, &drawOptions);
 	
 	cpSpaceEachBody_b(_space.space, ^(cpBody *body){
 		if(cpBodyGetType(body) == CP_BODY_TYPE_DYNAMIC){
-			[_debug drawDot:cpBodyGetPosition(body) radius:5.0 color:ccc4f(1, 0, 0, 1)];
-			
 			cpVect cog = cpBodyLocalToWorld(body, cpBodyGetCenterOfGravity(body));
-			[_debug drawDot:cog radius:5.0 color:ccc4f(1, 1, 0, 1)];
-//			CCLOG(@"%p cog: %@", body, NSStringFromCGPoint(cog));
+			[_debugDraw drawDot:cog radius:1.5 color:ccc4f(1, 1, 0, 1)];
 		}
 	});
 }

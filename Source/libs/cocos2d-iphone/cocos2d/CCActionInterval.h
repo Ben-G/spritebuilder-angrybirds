@@ -47,19 +47,19 @@ Example:
 
 	CCAction * pingPongAction = [CCSequence actions: action, [action reverse], nil];
 */
-@interface CCActionInterval: CCFiniteTimeAction <NSCopying>
+@interface CCActionInterval: CCActionFiniteTime <NSCopying>
 {
-	ccTime	_elapsed;
+	CCTime	_elapsed;
 	BOOL	_firstTick;
 }
 
 /** how many seconds had elapsed since the actions started to run. */
-@property (nonatomic,readonly) ccTime elapsed;
+@property (nonatomic,readonly) CCTime elapsed;
 
 /** creates the action */
-+(id) actionWithDuration: (ccTime) d;
++(id) actionWithDuration: (CCTime) d;
 /** initializes the action */
--(id) initWithDuration: (ccTime) d;
+-(id) initWithDuration: (CCTime) d;
 /** returns YES if the action has finished */
 -(BOOL) isDone;
 /** returns a reversed action */
@@ -68,71 +68,71 @@ Example:
 
 /** Runs actions sequentially, one after another
  */
-@interface CCSequence : CCActionInterval <NSCopying>
+@interface CCActionSequence : CCActionInterval <NSCopying>
 {
-	CCFiniteTimeAction *_actions[2];
-	ccTime _split;
+	CCActionFiniteTime *_actions[2];
+	CCTime _split;
 	int _last;
 }
 /** helper constructor to create an array of sequence-able actions */
-+(id) actions: (CCFiniteTimeAction*) action1, ... NS_REQUIRES_NIL_TERMINATION;
++(id) actions: (CCActionFiniteTime*) action1, ... NS_REQUIRES_NIL_TERMINATION;
 /** helper constructor to create an array of sequence-able actions */
-+(id) actions: (CCFiniteTimeAction*) action1 vaList:(va_list) args;
++(id) actions: (CCActionFiniteTime*) action1 vaList:(va_list) args;
 /** helper constructor to create an array of sequence-able actions given an array */
 +(id) actionWithArray: (NSArray*) arrayOfActions;
 /** creates the action */
-+(id) actionOne:(CCFiniteTimeAction*)actionOne two:(CCFiniteTimeAction*)actionTwo;
++(id) actionOne:(CCActionFiniteTime*)actionOne two:(CCActionFiniteTime*)actionTwo;
 /** initializes the action */
--(id) initOne:(CCFiniteTimeAction*)actionOne two:(CCFiniteTimeAction*)actionTwo;
+-(id) initOne:(CCActionFiniteTime*)actionOne two:(CCActionFiniteTime*)actionTwo;
 @end
 
 
 /** Repeats an action a number of times.
  * To repeat an action forever use the CCRepeatForever action.
  */
-@interface CCRepeat : CCActionInterval <NSCopying>
+@interface CCActionRepeat : CCActionInterval <NSCopying>
 {
 	NSUInteger _times;
 	NSUInteger _total;
-	ccTime _nextDt;
+	CCTime _nextDt;
 	BOOL _isActionInstant;
-	CCFiniteTimeAction *_innerAction;
+	CCActionFiniteTime *_innerAction;
 }
 
 /** Inner action */
-@property (nonatomic,readwrite,strong) CCFiniteTimeAction *innerAction;
+@property (nonatomic,readwrite,strong) CCActionFiniteTime *innerAction;
 
 /** creates a CCRepeat action. Times is an unsigned integer between 1 and MAX_UINT.
  */
-+(id) actionWithAction:(CCFiniteTimeAction*)action times: (NSUInteger)times;
++(id) actionWithAction:(CCActionFiniteTime*)action times: (NSUInteger)times;
 /** initializes a CCRepeat action. Times is an unsigned integer between 1 and MAX_UINT */
--(id) initWithAction:(CCFiniteTimeAction*)action times: (NSUInteger)times;
+-(id) initWithAction:(CCActionFiniteTime*)action times: (NSUInteger)times;
 @end
 
 /** Spawn a new action immediately
  */
-@interface CCSpawn : CCActionInterval <NSCopying>
+@interface CCActionSpawn : CCActionInterval <NSCopying>
 {
-	CCFiniteTimeAction *_one;
-	CCFiniteTimeAction *_two;
+	CCActionFiniteTime *_one;
+	CCActionFiniteTime *_two;
 }
 /** helper constructor to create an array of spawned actions */
-+(id) actions: (CCFiniteTimeAction*) action1, ... NS_REQUIRES_NIL_TERMINATION;
++(id) actions: (CCActionFiniteTime*) action1, ... NS_REQUIRES_NIL_TERMINATION;
 /** helper constructor to create an array of spawned actions */
-+(id) actions: (CCFiniteTimeAction*) action1 vaList:(va_list)args;
++(id) actions: (CCActionFiniteTime*) action1 vaList:(va_list)args;
 /** helper constructor to create an array of spawned actions given an array */
 +(id) actionWithArray: (NSArray*) arrayOfActions;
 /** creates the Spawn action */
-+(id) actionOne: (CCFiniteTimeAction*) one two:(CCFiniteTimeAction*) two;
++(id) actionOne: (CCActionFiniteTime*) one two:(CCActionFiniteTime*) two;
 /** initializes the Spawn action with the 2 actions to spawn */
--(id) initOne: (CCFiniteTimeAction*) one two:(CCFiniteTimeAction*) two;
+-(id) initOne: (CCActionFiniteTime*) one two:(CCActionFiniteTime*) two;
 @end
 
 /**  Rotates a CCNode object to a certain angle by modifying it's
  rotation attribute.
  The direction will be decided by the shortest angle.
 */
-@interface CCRotateTo : CCActionInterval <NSCopying>
+@interface CCActionRotateTo : CCActionInterval <NSCopying>
 {
 	float _dstAngleX;
 	float _startAngleX;
@@ -143,18 +143,18 @@ Example:
 	float _diffAngleY;
 }
 /** creates the action */
-+(id) actionWithDuration:(ccTime)duration angle:(float)angle;
++(id) actionWithDuration:(CCTime)duration angle:(float)angle;
 /** initializes the action */
--(id) initWithDuration:(ccTime)duration angle:(float)angle;
+-(id) initWithDuration:(CCTime)duration angle:(float)angle;
 
 /** creates the action with separate rotation angles */
-+(id) actionWithDuration: (ccTime) t angleX:(float) aX angleY:(float) aY;
--(id) initWithDuration: (ccTime) t angleX:(float) aX angleY:(float) aY;
++(id) actionWithDuration: (CCTime) t angleX:(float) aX angleY:(float) aY;
+-(id) initWithDuration: (CCTime) t angleX:(float) aX angleY:(float) aY;
 @end
 
 /** Rotates a CCNode object clockwise a number of degrees by modifying its rotation attribute.
 */
-@interface CCRotateBy : CCActionInterval <NSCopying>
+@interface CCActionRotateBy : CCActionInterval <NSCopying>
 {
 	float _angleX;
 	float _startAngleX;
@@ -162,13 +162,13 @@ Example:
 	float _startAngleY;
 }
 /** creates the action */
-+(id) actionWithDuration:(ccTime)duration angle:(float)deltaAngle;
++(id) actionWithDuration:(CCTime)duration angle:(float)deltaAngle;
 /** initializes the action */
--(id) initWithDuration:(ccTime)duration angle:(float)deltaAngle;
+-(id) initWithDuration:(CCTime)duration angle:(float)deltaAngle;
 
 /** creates the action with separate rotation angles */
-+(id) actionWithDuration: (ccTime) t angleX:(float) aX angleY:(float) aY;
--(id) initWithDuration: (ccTime) t angleX:(float) aX angleY:(float) aY;
++(id) actionWithDuration: (CCTime) t angleX:(float) aX angleY:(float) aY;
+-(id) initWithDuration: (CCTime) t angleX:(float) aX angleY:(float) aY;
 @end
 
 /**  Moves a CCNode object x,y pixels by modifying it's position attribute.
@@ -177,16 +177,16 @@ Example:
  movement will be the sum of individual movements.
  @since v2.1beta2-custom
  */
-@interface CCMoveBy : CCActionInterval <NSCopying>
+@interface CCActionMoveBy : CCActionInterval <NSCopying>
 {
 	CGPoint _positionDelta;
 	CGPoint _startPos;
 	CGPoint _previousPos;
 }
 /** creates the action */
-+(id) actionWithDuration: (ccTime)duration position:(CGPoint)deltaPosition;
++(id) actionWithDuration: (CCTime)duration position:(CGPoint)deltaPosition;
 /** initializes the action */
--(id) initWithDuration: (ccTime)duration position:(CGPoint)deltaPosition;
+-(id) initWithDuration: (CCTime)duration position:(CGPoint)deltaPosition;
 @end
 
 /** Moves a CCNode object to the position x,y. x and y are absolute coordinates by modifying it's position attribute.
@@ -194,20 +194,20 @@ Example:
  movement will be the sum of individual movements.
  @since v2.1beta2-custom
  */
-@interface CCMoveTo : CCMoveBy
+@interface CCActionMoveTo : CCActionMoveBy
 {
 	CGPoint _endPosition;
 }
 /** creates the action */
-+(id) actionWithDuration:(ccTime)duration position:(CGPoint)position;
++(id) actionWithDuration:(CCTime)duration position:(CGPoint)position;
 /** initializes the action */
--(id) initWithDuration:(ccTime)duration position:(CGPoint)position;
+-(id) initWithDuration:(CCTime)duration position:(CGPoint)position;
 @end
 
 /** Skews a CCNode object to given angles by modifying its skewX and skewY attributes
  @since v1.0
  */
-@interface CCSkewTo : CCActionInterval <NSCopying>
+@interface CCActionSkewTo : CCActionInterval <NSCopying>
 {
 	float _skewX;
 	float _skewY;
@@ -219,40 +219,40 @@ Example:
 	float _deltaY;
 }
 /** creates the action */
-+(id) actionWithDuration:(ccTime)t skewX:(float)sx skewY:(float)sy;
++(id) actionWithDuration:(CCTime)t skewX:(float)sx skewY:(float)sy;
 /** initializes the action with duration, skew X and skew Y */
--(id) initWithDuration:(ccTime)t skewX:(float)sx skewY:(float)sy;
+-(id) initWithDuration:(CCTime)t skewX:(float)sx skewY:(float)sy;
 @end
 
 /** Skews a CCNode object by skewX and skewY degrees
  @since v1.0
  */
-@interface CCSkewBy : CCSkewTo <NSCopying>
+@interface CCActionSkewBy : CCActionSkewTo <NSCopying>
 {
 }
 /** initializes the action with duration, skew X and skew Y */
--(id) initWithDuration:(ccTime)t skewX:(float)sx skewY:(float)sy;
+-(id) initWithDuration:(CCTime)t skewX:(float)sx skewY:(float)sy;
 @end
 
 /** Moves a CCNode object simulating a parabolic jump movement by modifying its position attribute.
 */
-@interface CCJumpBy : CCActionInterval <NSCopying>
+@interface CCActionJumpBy : CCActionInterval <NSCopying>
 {
 	CGPoint _startPosition;
 	CGPoint _delta;
-	ccTime	_height;
+	CCTime	_height;
 	NSUInteger _jumps;
 	CGPoint _previousPos;
 }
 /** creates the action */
-+(id) actionWithDuration: (ccTime)duration position:(CGPoint)position height:(ccTime)height jumps:(NSUInteger)jumps;
++(id) actionWithDuration: (CCTime)duration position:(CGPoint)position height:(CCTime)height jumps:(NSUInteger)jumps;
 /** initializes the action */
--(id) initWithDuration: (ccTime)duration position:(CGPoint)position height:(ccTime)height jumps:(NSUInteger)jumps;
+-(id) initWithDuration: (CCTime)duration position:(CGPoint)position height:(CCTime)height jumps:(NSUInteger)jumps;
 @end
 
 /** Moves a CCNode object to a parabolic position simulating a jump movement by modifying its position attribute.
 */
-@interface CCJumpTo : CCJumpBy <NSCopying>
+@interface CCActionJumpTo : CCActionJumpBy <NSCopying>
 {
 }
 // XXX: Added to prevent bug on BridgeSupport
@@ -272,7 +272,7 @@ typedef struct _ccBezierConfig {
 
 /** An action that moves the target with a cubic Bezier curve by a certain distance.
  */
-@interface CCBezierBy : CCActionInterval <NSCopying>
+@interface CCActionBezierBy : CCActionInterval <NSCopying>
 {
 	ccBezierConfig _config;
 	CGPoint _startPosition;
@@ -280,16 +280,16 @@ typedef struct _ccBezierConfig {
 }
 
 /** creates the action with a duration and a bezier configuration */
-+(id) actionWithDuration: (ccTime) t bezier:(ccBezierConfig) c;
++(id) actionWithDuration: (CCTime) t bezier:(ccBezierConfig) c;
 
 /** initializes the action with a duration and a bezier configuration */
--(id) initWithDuration: (ccTime) t bezier:(ccBezierConfig) c;
+-(id) initWithDuration: (CCTime) t bezier:(ccBezierConfig) c;
 @end
 
 /** An action that moves the target with a cubic Bezier curve to a destination point.
  @since v0.8.2
  */
-@interface CCBezierTo : CCBezierBy
+@interface CCActionBezierTo : CCActionBezierBy
 {
 	ccBezierConfig _toConfig;
 }
@@ -300,7 +300,7 @@ typedef struct _ccBezierConfig {
 /** Scales a CCNode object to a zoom factor by modifying its scale attribute.
  @warning This action doesn't support "reverse"
  */
-@interface CCScaleTo : CCActionInterval <NSCopying>
+@interface CCActionScaleTo : CCActionInterval <NSCopying>
 {
 	float _scaleX;
 	float _scaleY;
@@ -312,18 +312,18 @@ typedef struct _ccBezierConfig {
 	float _deltaY;
 }
 /** creates the action with the same scale factor for X and Y */
-+(id) actionWithDuration: (ccTime)duration scale:(float) s;
++(id) actionWithDuration: (CCTime)duration scale:(float) s;
 /** initializes the action with the same scale factor for X and Y */
--(id) initWithDuration: (ccTime)duration scale:(float) s;
+-(id) initWithDuration: (CCTime)duration scale:(float) s;
 /** creates the action with and X factor and a Y factor */
-+(id) actionWithDuration: (ccTime)duration scaleX:(float) sx scaleY:(float)sy;
++(id) actionWithDuration: (CCTime)duration scaleX:(float) sx scaleY:(float)sy;
 /** initializes the action with and X factor and a Y factor */
--(id) initWithDuration: (ccTime)duration scaleX:(float) sx scaleY:(float)sy;
+-(id) initWithDuration: (CCTime)duration scaleX:(float) sx scaleY:(float)sy;
 @end
 
 /** Scales a CCNode object a zoom factor by modifying its scale attribute.
 */
-@interface CCScaleBy : CCScaleTo <NSCopying>
+@interface CCActionScaleBy : CCActionScaleTo <NSCopying>
 {
 }
 // XXX: Added to prevent bug on BridgeSupport
@@ -332,87 +332,87 @@ typedef struct _ccBezierConfig {
 
 /** Blinks a CCNode object by modifying its visible attribute
 */
-@interface CCBlink : CCActionInterval <NSCopying>
+@interface CCActionBlink : CCActionInterval <NSCopying>
 {
 	NSUInteger _times;
 	BOOL _originalState;
 }
 /** creates the action */
-+(id) actionWithDuration: (ccTime)duration blinks:(NSUInteger)blinks;
++(id) actionWithDuration: (CCTime)duration blinks:(NSUInteger)blinks;
 /** initializes the action */
--(id) initWithDuration: (ccTime)duration blinks:(NSUInteger)blinks;
+-(id) initWithDuration: (CCTime)duration blinks:(NSUInteger)blinks;
 @end
 
 /** Fades In an object that implements the CCRGBAProtocol protocol. It modifies the opacity from 0 to 255.
  The "reverse" of this action is FadeOut
  */
-@interface CCFadeIn : CCActionInterval <NSCopying>
+@interface CCActionFadeIn : CCActionInterval <NSCopying>
 {
 }
 // XXX: Added to prevent bug on BridgeSupport
--(void) update:(ccTime)dt;
+-(void) update:(CCTime)dt;
 @end
 
 /** Fades Out an object that implements the CCRGBAProtocol protocol. It modifies the opacity from 255 to 0.
  The "reverse" of this action is FadeIn
 */
-@interface CCFadeOut : CCActionInterval <NSCopying>
+@interface CCActionFadeOut : CCActionInterval <NSCopying>
 {
 }
 // XXX: Added to prevent bug on BridgeSupport
--(void) update:(ccTime)dt;
+-(void) update:(CCTime)dt;
 @end
 
 /** Fades an object that implements the CCRGBAProtocol protocol. It modifies the opacity from the current value to a custom one.
  @warning This action doesn't support "reverse"
  */
-@interface CCFadeTo : CCActionInterval <NSCopying>
+@interface CCActionFadeTo : CCActionInterval <NSCopying>
 {
 	GLubyte _toOpacity;
 	GLubyte _fromOpacity;
 }
 /** creates an action with duration and opacity */
-+(id) actionWithDuration:(ccTime)duration opacity:(GLubyte)opactiy;
++(id) actionWithDuration:(CCTime)duration opacity:(GLubyte)opactiy;
 /** initializes the action with duration and opacity */
--(id) initWithDuration:(ccTime)duration opacity:(GLubyte)opacity;
+-(id) initWithDuration:(CCTime)duration opacity:(GLubyte)opacity;
 @end
 
 /** Tints a CCNode that implements the CCNodeRGB protocol from current tint to a custom one.
  @warning This action doesn't support "reverse"
  @since v0.7.2
 */
-@interface CCTintTo : CCActionInterval <NSCopying>
+@interface CCActionTintTo : CCActionInterval <NSCopying>
 {
 	ccColor3B _to;
 	ccColor3B _from;
 }
 /** creates an action with duration and color */
-+(id) actionWithDuration:(ccTime)duration red:(GLubyte)red green:(GLubyte)green blue:(GLubyte)blue;
++(id) actionWithDuration:(CCTime)duration red:(GLubyte)red green:(GLubyte)green blue:(GLubyte)blue;
 /** initializes the action with duration and color */
--(id) initWithDuration:(ccTime)duration red:(GLubyte)red green:(GLubyte)green blue:(GLubyte)blue;
+-(id) initWithDuration:(CCTime)duration red:(GLubyte)red green:(GLubyte)green blue:(GLubyte)blue;
 @end
 
 /** Tints a CCNode that implements the CCNodeRGB protocol from current tint to a custom one.
  @since v0.7.2
  */
-@interface CCTintBy : CCActionInterval <NSCopying>
+@interface CCActionTintBy : CCActionInterval <NSCopying>
 {
 	GLshort _deltaR, _deltaG, _deltaB;
 	GLshort _fromR, _fromG, _fromB;
 }
 /** creates an action with duration and color */
-+(id) actionWithDuration:(ccTime)duration red:(GLshort)deltaRed green:(GLshort)deltaGreen blue:(GLshort)deltaBlue;
++(id) actionWithDuration:(CCTime)duration red:(GLshort)deltaRed green:(GLshort)deltaGreen blue:(GLshort)deltaBlue;
 /** initializes the action with duration and color */
--(id) initWithDuration:(ccTime)duration red:(GLshort)deltaRed green:(GLshort)deltaGreen blue:(GLshort)deltaBlue;
+-(id) initWithDuration:(CCTime)duration red:(GLshort)deltaRed green:(GLshort)deltaGreen blue:(GLshort)deltaBlue;
 @end
 
 /** Delays the action a certain amount of seconds
 */
-@interface CCDelayTime : CCActionInterval <NSCopying>
+@interface CCActionDelay : CCActionInterval <NSCopying>
 {
 }
 // XXX: Added to prevent bug on BridgeSupport
--(void) update:(ccTime)dt;
+-(void) update:(CCTime)dt;
 @end
 
 /** Executes an action in reverse order, from time=duration to time=0
@@ -422,21 +422,21 @@ typedef struct _ccBezierConfig {
  of your own actions, but using it outside the "reversed"
  scope is not recommended.
 */
-@interface CCReverseTime : CCActionInterval <NSCopying>
+@interface CCActionReverse : CCActionInterval <NSCopying>
 {
-	CCFiniteTimeAction * _other;
+	CCActionFiniteTime * _other;
 }
 /** creates the action */
-+(id) actionWithAction: (CCFiniteTimeAction*) action;
++(id) actionWithAction: (CCActionFiniteTime*) action;
 /** initializes the action */
--(id) initWithAction: (CCFiniteTimeAction*) action;
+-(id) initWithAction: (CCActionFiniteTime*) action;
 @end
 
 
 @class CCAnimation;
-@class CCTexture2D;
+@class CCTexture;
 /** Animates a sprite given the name of an Animation */
-@interface CCAnimate : CCActionInterval <NSCopying>
+@interface CCActionAnimate : CCActionInterval <NSCopying>
 {
 	NSMutableArray		*_splitTimes;
 	NSInteger			_nextFrame;
@@ -451,23 +451,4 @@ typedef struct _ccBezierConfig {
 +(id) actionWithAnimation:(CCAnimation*)animation;
 /** initializes the action with an Animation and will restore the original frame when the animation is over */
 -(id) initWithAnimation:(CCAnimation*)animation;
-@end
-
-/** Overrides the target of an action so that it always runs on the target
- * specified at action creation rather than the one specified by runAction.
- */
-@interface CCTargetedAction : CCActionInterval <NSCopying>
-{
-	id _forcedTarget;
-	CCFiniteTimeAction* _action;
-}
-/** This is the target that the action will be forced to run with */
-@property(readwrite,nonatomic,strong) id forcedTarget;
-
-/** Create an action with the specified action and forced target */
-+ (id) actionWithTarget:(id) target action:(CCFiniteTimeAction*) action;
-
-/** Init an action with the specified action and forced target */
-- (id) initWithTarget:(id) target action:(CCFiniteTimeAction*) action;
-
 @end

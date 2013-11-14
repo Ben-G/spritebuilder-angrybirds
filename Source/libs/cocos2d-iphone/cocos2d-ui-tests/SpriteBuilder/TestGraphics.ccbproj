@@ -125,6 +125,32 @@
 		</dict>
 		<key>Interface/table-bg-hilite.png</key>
 		<dict>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Interface/table-bg-normal.png</key>
+		<dict>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Interface/textfield-bg.png</key>
+		<dict>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Sprites</key>
+		<dict>
+			<key>isSmartSpriteSheet</key>
+			<true/>
+		</dict>
+		<key>Sprites/circle.png</key>
+		<dict>
 			<key>isDirty</key>
 			<true/>
 			<key>scaleFrom</key>
@@ -132,7 +158,34 @@
 			<key>tabletScale</key>
 			<integer>1</integer>
 		</dict>
-		<key>Interface/table-bg-normal.png</key>
+		<key>Tests/slider-background-hilite.png</key>
+		<dict>
+			<key>isDirty</key>
+			<true/>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Tests/slider-background.png</key>
+		<dict>
+			<key>isDirty</key>
+			<true/>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Tests/slider-handle.png</key>
+		<dict>
+			<key>isDirty</key>
+			<true/>
+			<key>scaleFrom</key>
+			<integer>2</integer>
+			<key>tabletScale</key>
+			<integer>1</integer>
+		</dict>
+		<key>Tests/textfield-bg.png</key>
 		<dict>
 			<key>isDirty</key>
 			<true/>
@@ -180,8 +233,8 @@
 	<key>tabletPositionScaleFactorType</key>
 	<integer>0</integer>
 	<key>versionStr</key>
-	<string>Version: 0.6b1
-GitHub: e6cadfe29f
+	<string>Version: 0.6b3
+GitHub: bbe1f0c90c
 </string>
 </dict>
 </plist>

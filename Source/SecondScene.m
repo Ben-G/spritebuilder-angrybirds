@@ -20,13 +20,13 @@
     
     CCNode *floorNode = [CCNode node];
     CCPhysicsBody *floor = [CCPhysicsBody bodyWithRect:CGRectMake(0, 30, 1000, 10) cornerRadius:0.f];
-    floor.type = kCCPhysicsBodyTypeStatic;
+    floor.type = CCPhysicsBodyTypeStatic;
     floorNode.physicsBody = floor;
     [self.contentContainer addChild:floorNode];
 }
 
 - (void)onAppear {
-    CCMoveTo *moveTo = [CCMoveTo actionWithDuration:6.f position:ccp(self.contentSize.width, self.penguin.position.y)];
+    CCActionMoveTo *moveTo = [CCActionMoveTo actionWithDuration:6.f position:ccp(self.contentSize.width, self.penguin.position.y)];
     [self.penguin runAction:moveTo];
     
     /* following line cannot be used, since 'affectedByGravity' is not implemented yet*/
@@ -39,7 +39,9 @@
 
 - (void)fire {
     NSLog(@"Fire");
-    CCSprite *bullet = [CCSprite spriteWithImageNamed:@"flyingpenguin.png"];
+
+    CCSpriteFrame* spriteFrame = [CCSpriteFrame frameWithImageNamed:@"ccbResources/flyingpenguin.png"];
+    CCSprite *bullet = [CCSprite spriteWithSpriteFrame:spriteFrame];
     bullet.position = ccp(0, self.catapultArm.contentSize.height);
     [self.catapultArm addChild:bullet];
     
@@ -52,7 +54,7 @@
         bullet.position = ccp(self.catapultArm.position.x, self.catapultArm.position.y + self.catapultArm.contentSize.height);
         [self.contentContainer addChild:bullet];
         
-        CCFollow *follow = [CCFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 960, 320)];
+        CCActionFollow *follow = [CCActionFollow actionWithTarget:bullet worldBoundary:CGRectMake(0, 0, 960, 320)];
         [self.contentContainer runAction:follow];
         self.flyingPenguin = bullet;
         shot = TRUE;
@@ -73,9 +75,7 @@
     }
 }
 
-- (void)update:(ccTime)delta {
-    [super update:delta];
-    
+- (void)update:(CCTime)delta {
     if (!shot) {
         return;
     }

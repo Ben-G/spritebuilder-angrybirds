@@ -27,7 +27,7 @@
  */
 
 #import "CCNode.h"
-#import "CCGrid.h"
+#import "CCNode_Private.h"
 #import "CCDirector.h"
 #import "CCActionManager.h"
 #import "CCScheduler.h"
@@ -38,6 +38,7 @@
 #import "ccMacros.h"
 #import "CCGLProgram.h"
 #import "CCPhysics+ObjectiveChipmunk.h"
+#import "CCDirector_Private.h"
 
 // externals
 #import "kazmath/GL/matrix.h"
@@ -70,11 +71,15 @@
 
 }
 
+// Suppress automatic ivar creation.
+@dynamic runningInActiveScene;
+@dynamic paused;
+
 static inline
 CCPhysicsBody *
-GetBodyIfRunning(CCNode *self)
+GetBodyIfRunning(CCNode *node)
 {
-	return (self->_isRunning ? self->_physicsBody : nil);
+	return (node->_isInActiveScene ? node->_physicsBody : nil);
 }
 
 static inline CGAffineTransform
@@ -89,86 +94,28 @@ NodeToPhysicsTransform(CCNode *node)
 		}
 	}
 	
-	@throw @"Node is not added to a CCPhysicsNode";
+	@throw [NSException exceptionWithName:@"CCPhysics Error" reason:@"Node is not added to a CCPhysicsNode" userInfo:nil];
+}
+
+static inline float
+NodeToPhysicsRotation(CCNode *node)
+{
+	float rotation = 0.0;
+	for(; node; node = node.parent){
+		if(node.isPhysicsNode){
+			return rotation;
+		} else {
+			rotation -= node.rotation;
+		}
+	}
+	
+	@throw [NSException exceptionWithName:@"CCPhysics Error" reason:@"Node is not added to a CCPhysicsNode" userInfo:nil];
 }
 
 static inline CGAffineTransform
-RigidBodyToParentTransform(CCNode *self, CCPhysicsBody *body)
+RigidBodyToParentTransform(CCNode *node, CCPhysicsBody *body)
 {
-	return cpTransformMult(cpTransformInverse(NodeToPhysicsTransform(self.parent)), body.absoluteTransform);
-}
-
-static inline
-CGPoint GetPosition(CCNode *self)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		// Return the position of the anchor point
-		CGPoint anchor = self->_anchorPointInPoints;
-		return cpTransformPoint(RigidBodyToParentTransform(self, body), cpv(anchor.x*self->_scaleX, anchor.y*self->_scaleY));
-	} else {
-		return self->_position;
-	}
-}
-
-static inline void
-SetPosition(CCNode *self, CGPoint position)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		// This is *ridiculously* inefficient, but works for now.
-		CGPoint currentPosition = GetPosition(self);
-		CGPoint delta = ccpSub(position, currentPosition);
-		body.absolutePosition = ccpAdd(body.absolutePosition, cpTransformVect(NodeToPhysicsTransform(self.parent), delta));
-	} else {
-		self->_position = position;
-	}
-}
-
-static inline float
-GetRotationX(CCNode *self)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		CGAffineTransform transform = RigidBodyToParentTransform(self, body);
-		return -CC_RADIANS_TO_DEGREES(atan2f(transform.b, transform.a));
-	} else {
-		return self->_rotationalSkewX;
-	}
-}
-
-static inline float
-GetRotationY(CCNode *self)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		CGAffineTransform transform = RigidBodyToParentTransform(self, body);
-		return 90.0f - CC_RADIANS_TO_DEGREES(atan2f(transform.d, transform.c));
-	} else {
-		return self->_rotationalSkewX;
-	}
-}
-
-static inline void
-SetRotationX(CCNode *self, float rotation)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		@throw @"Not yet implemented";
-	} else {
-		self->_rotationalSkewX = rotation;
-	}
-}
-
-static inline void
-SetRotationY(CCNode *self, float rotation)
-{
-	CCPhysicsBody *body = GetBodyIfRunning(self);
-	if(body){
-		@throw @"Not yet implemented";
-	} else {
-		self->_rotationalSkewY = rotation;
-	}
+	return cpTransformMult(cpTransformInverse(NodeToPhysicsTransform(node.parent)), body.absoluteTransform);
 }
 
 // XXX: Yes, nodes might have a sort problem once every 15 days if the game runs at 60 FPS and each frame sprites are reordered.
@@ -177,11 +124,9 @@ static NSUInteger globalOrderOfArrival = 1;
 @synthesize children = _children;
 @synthesize visible = _visible;
 @synthesize parent = _parent;
-@synthesize grid = _grid;
 @synthesize zOrder = _zOrder;
-@synthesize tag = _tag;
+@synthesize name = _name;
 @synthesize vertexZ = _vertexZ;
-@synthesize isRunning = _isRunning;
 @synthesize userObject = _userObject;
 @synthesize	shaderProgram = _shaderProgram;
 @synthesize orderOfArrival = _orderOfArrival;
@@ -205,8 +150,7 @@ static NSUInteger globalOrderOfArrival = 1;
 -(id) init
 {
 	if ((self=[super init]) ) {
-
-		_isRunning = NO;
+		_isInActiveScene = NO;
 
 		_skewX = _skewY = 0.0f;
 		_rotationalSkewX = _rotationalSkewY = 0.0f;
@@ -219,11 +163,7 @@ static NSUInteger globalOrderOfArrival = 1;
 
 		_vertexZ = 0;
 
-		_grid = nil;
-
 		_visible = YES;
-
-		_tag = kCCNodeTagInvalid;
 
 		_zOrder = 0;
 
@@ -248,10 +188,7 @@ static NSUInteger globalOrderOfArrival = 1;
 		self.scheduler = [director scheduler];
         
         // set default touch handling
-        self.userInteractionEnabled = NO;
-        self.claimsUserInteraction = YES;
-        self.multipleTouchEnabled = NO;
-        self.hitAreaExpansion = 1.0f;
+        self.hitAreaExpansion = 0.0f;
         
 	}
 
@@ -262,7 +199,7 @@ static NSUInteger globalOrderOfArrival = 1;
 {
 	// actions
 	[self stopAllActions];
-	[self unscheduleAllSelectors];
+	[self.scheduler unscheduleTarget:self];
 
 	// timers
 	[_children makeObjectsPerformSelector:@selector(cleanup)];
@@ -270,7 +207,7 @@ static NSUInteger globalOrderOfArrival = 1;
 
 - (NSString*) description
 {
-	return [NSString stringWithFormat:@"<%@ = %p | Tag = %ld>", [self class], self, (long)_tag];
+	return [NSString stringWithFormat:@"<%@ = %p | Tag = %@>", [self class], self, _name];
 }
 
 - (void) dealloc
@@ -290,35 +227,49 @@ static NSUInteger globalOrderOfArrival = 1;
 // getters synthesized, setters explicit
 -(void) setRotation: (float)newRotation
 {
-	SetRotationX(self, newRotation);
-	SetRotationY(self, newRotation);
-	_isTransformDirty = _isInverseDirty = YES;
+	CCPhysicsBody *body = GetBodyIfRunning(self);
+	if(body){
+		body.absoluteRadians = -CC_DEGREES_TO_RADIANS(newRotation + NodeToPhysicsRotation(self.parent));
+	} else {
+		_rotationalSkewX = newRotation;
+		_rotationalSkewY = newRotation;
+		_isTransformDirty = _isInverseDirty = YES;
+	}
 }
 
 -(float) rotation
 {
-	NSAssert( _rotationalSkewX == _rotationalSkewY, @"CCNode#rotation. RotationX != RotationY. Don't know which one to return");
-	return GetRotationX(self);
+	CCPhysicsBody *body = GetBodyIfRunning(self);
+	if(body){
+		return -CC_RADIANS_TO_DEGREES(body.absoluteRadians) + NodeToPhysicsRotation(self.parent);
+	} else {
+		NSAssert( _rotationalSkewX == _rotationalSkewY, @"CCNode#rotation. RotationX != RotationY. Don't know which one to return");
+		return _rotationalSkewX;
+	}
 }
 
 -(float)rotationalSkewX {
-	return GetRotationX(self);
+	return _rotationalSkewX;
 }
 
 -(void) setRotationalSkewX: (float)newX
 {
-	SetRotationX(self, newX);
+	NSAssert(_physicsBody == nil, @"Currently physics nodes don't support skewing.");
+	
+	_rotationalSkewX = newX;
 	_isTransformDirty = _isInverseDirty = YES;
 }
 
 -(float)rotationalSkewY
 {
-	return GetRotationY(self);
+	return _rotationalSkewY;
 }
 
 -(void) setRotationalSkewY: (float)newY
 {
-	SetRotationY(self, newY);
+	NSAssert(_physicsBody == nil, @"Currently physics nodes don't support skewing.");
+	
+	_rotationalSkewY = newY;
 	_isTransformDirty = _isInverseDirty = YES;
 }
 
@@ -336,25 +287,56 @@ static NSUInteger globalOrderOfArrival = 1;
 
 -(void) setSkewX:(float)newSkewX
 {
+	NSAssert(_physicsBody == nil, @"Currently physics nodes don't support skewing.");
+	
 	_skewX = newSkewX;
 	_isTransformDirty = _isInverseDirty = YES;
 }
 
 -(void) setSkewY:(float)newSkewY
 {
+	NSAssert(_physicsBody == nil, @"Currently physics nodes don't support skewing.");
+	
 	_skewY = newSkewY;
 	_isTransformDirty = _isInverseDirty = YES;
 }
 
+static inline CGPoint
+GetPositionFromBody(CCNode *node, CCPhysicsBody *body)
+{
+	return cpTransformPoint([node nodeToParentTransform], node->_anchorPointInPoints);
+}
+
 -(CGPoint)position
 {
-	return GetPosition(self);
+	CCPhysicsBody *body = GetBodyIfRunning(self);
+	if(body){
+		return [self convertPositionFromPoints:GetPositionFromBody(self, body) type:_positionType];
+	} else {
+		return _position;
+	}
 }
 
 -(void) setPosition: (CGPoint)newPosition
 {
-	SetPosition(self, newPosition);
+	CCPhysicsBody *body = GetBodyIfRunning(self);
+	if(body){
+		#warning This is *ridiculously* inefficient, but works for now.
+		CGPoint currentPosition = GetPositionFromBody(self, body);
+		CGPoint delta = ccpSub([self convertPositionToPoints:newPosition type:_positionType], currentPosition);
+		body.absolutePosition = ccpAdd(body.absolutePosition, cpTransformVect(NodeToPhysicsTransform(self.parent), delta));
+	} else {
+		_position = newPosition;
+		_isTransformDirty = _isInverseDirty = YES;
+	}
+}
+
+-(void)setPositionType:(CCPositionType)positionType
+{
+	_positionType = positionType;
 	_isTransformDirty = _isInverseDirty = YES;
+	
+	#warning Position is not preserved when changing position type.
 }
 
 -(void) setAnchorPoint:(CGPoint)point
@@ -396,45 +378,45 @@ static NSUInteger globalOrderOfArrival = 1;
     CCContentSizeUnit heightUnit = type.heightUnit;
     
     // Width
-    if (widthUnit == kCCContentSizeUnitPoints)
+    if (widthUnit == CCContentSizeUnitPoints)
     {
         size.width = contentSize.width;
     }
-    else if (widthUnit == kCCContentSizeUnitScaled)
+    else if (widthUnit == CCContentSizeUnitScaled)
     {
         size.width = director.positionScaleFactor * contentSize.width;
     }
-    else if (widthUnit == kCCContentSizeUnitNormalized)
+    else if (widthUnit == CCContentSizeUnitNormalized)
     {
         size.width = contentSize.width * _parent.contentSizeInPoints.width;
     }
-    else if (widthUnit == kCCContentSizeUnitInsetPoints)
+    else if (widthUnit == CCContentSizeUnitInsetPoints)
     {
         size.width = _parent.contentSizeInPoints.width - contentSize.width;
     }
-    else if (widthUnit == kCCContentSizeUnitInsetScaled)
+    else if (widthUnit == CCContentSizeUnitInsetScaled)
     {
         size.width = _parent.contentSizeInPoints.width - contentSize.width * director.positionScaleFactor;
     }
     
     // Height
-    if (heightUnit == kCCContentSizeUnitPoints)
+    if (heightUnit == CCContentSizeUnitPoints)
     {
         size.height = contentSize.height;
     }
-    else if (heightUnit == kCCContentSizeUnitScaled)
+    else if (heightUnit == CCContentSizeUnitScaled)
     {
         size.height = director.positionScaleFactor * contentSize.height;
     }
-    else if (heightUnit == kCCContentSizeUnitNormalized)
+    else if (heightUnit == CCContentSizeUnitNormalized)
     {
         size.height = contentSize.height * _parent.contentSizeInPoints.height;
     }
-    else if (heightUnit == kCCContentSizeUnitInsetPoints)
+    else if (heightUnit == CCContentSizeUnitInsetPoints)
     {
         size.height = _parent.contentSizeInPoints.height - contentSize.height;
     }
-    else if (heightUnit == kCCContentSizeUnitInsetScaled)
+    else if (heightUnit == CCContentSizeUnitInsetScaled)
     {
         size.height = _parent.contentSizeInPoints.height - contentSize.height * director.positionScaleFactor;
     }
@@ -452,15 +434,15 @@ static NSUInteger globalOrderOfArrival = 1;
     CCContentSizeUnit heightUnit = type.heightUnit;
     
     // Width
-    if (widthUnit == kCCContentSizeUnitPoints)
+    if (widthUnit == CCContentSizeUnitPoints)
     {
         size.width = pointSize.width;
     }
-    else if (widthUnit == kCCContentSizeUnitScaled)
+    else if (widthUnit == CCContentSizeUnitScaled)
     {
         size.width = pointSize.width / director.positionScaleFactor;
     }
-    else if (widthUnit == kCCContentSizeUnitNormalized)
+    else if (widthUnit == CCContentSizeUnitNormalized)
     {
         
         float parentWidthInPoints = _parent.contentSizeInPoints.width;
@@ -473,25 +455,25 @@ static NSUInteger globalOrderOfArrival = 1;
             size.width = 0;
         }
     }
-    else if (widthUnit == kCCContentSizeUnitInsetPoints)
+    else if (widthUnit == CCContentSizeUnitInsetPoints)
     {
         size.width = _parent.contentSizeInPoints.width - pointSize.width;
     }
-    else if (widthUnit == kCCContentSizeUnitInsetScaled)
+    else if (widthUnit == CCContentSizeUnitInsetScaled)
     {
         size.width = (_parent.contentSizeInPoints.width - pointSize.width) / director.positionScaleFactor;
     }
     
     // Height
-    if (heightUnit == kCCContentSizeUnitPoints)
+    if (heightUnit == CCContentSizeUnitPoints)
     {
         size.height = pointSize.height;
     }
-    else if (heightUnit == kCCContentSizeUnitScaled)
+    else if (heightUnit == CCContentSizeUnitScaled)
     {
         size.height = pointSize.height / director.positionScaleFactor;
     }
-    else if (heightUnit == kCCContentSizeUnitNormalized)
+    else if (heightUnit == CCContentSizeUnitNormalized)
     {
         
         float parentHeightInPoints = _parent.contentSizeInPoints.height;
@@ -504,11 +486,11 @@ static NSUInteger globalOrderOfArrival = 1;
             size.height = 0;
         }
     }
-    else if (heightUnit == kCCContentSizeUnitInsetPoints)
+    else if (heightUnit == CCContentSizeUnitInsetPoints)
     {
         size.height = _parent.contentSizeInPoints.height - pointSize.height;
     }
-    else if (heightUnit == kCCContentSizeUnitInsetScaled)
+    else if (heightUnit == CCContentSizeUnitInsetScaled)
     {
         size.height = (_parent.contentSizeInPoints.height - pointSize.height) / director.positionScaleFactor;
     }
@@ -523,7 +505,7 @@ static NSUInteger globalOrderOfArrival = 1;
 
 - (float) scaleInPoints
 {
-    if (_scaleType == kCCScaleTypeScaled)
+    if (_scaleType == CCScaleTypeScaled)
     {
         return self.scale * [CCDirector sharedDirector].positionScaleFactor;
     }
@@ -532,7 +514,7 @@ static NSUInteger globalOrderOfArrival = 1;
 
 - (float) scaleXInPoints
 {
-    if (_scaleType == kCCScaleTypeScaled)
+    if (_scaleType == CCScaleTypeScaled)
     {
         return _scaleX * [CCDirector sharedDirector].positionScaleFactor;
     }
@@ -541,7 +523,7 @@ static NSUInteger globalOrderOfArrival = 1;
 
 - (float) scaleYInPoints
 {
-    if (_scaleType == kCCScaleTypeScaled)
+    if (_scaleType == CCScaleTypeScaled)
     {
         return _scaleY * [CCDirector sharedDirector].positionScaleFactor;
     }
@@ -571,7 +553,7 @@ static NSUInteger globalOrderOfArrival = 1;
     if (visible == _visible) return;
     
     /** mark responder manager as dirty
-     @since v2.5
+     @since v3.0
      */
     [[[CCDirector sharedDirector] responderManager] markAsDirty];
     _visible = visible;
@@ -604,23 +586,39 @@ static NSUInteger globalOrderOfArrival = 1;
 	_children = [[NSMutableArray alloc] init];
 }
 
--(CCNode*) getChildByTag:(NSInteger) aTag
+-(CCNode*) getChildByName:(NSString *)name
 {
-	NSAssert( aTag != kCCNodeTagInvalid, @"Invalid tag");
+	NSAssert(name, @"name is NULL");
 
     for (CCNode* node in _children) {
-		if( node.tag == aTag )
+		if( [node.name isEqualToString:name] )
 			return node;
 	}
 	// not found
 	return nil;
 }
 
+// Recursively increment/decrement _pausedAncestors on the children of 'node'.
+static void
+RecursivelyIncrementPausedAncestors(CCNode *node, int increment)
+{
+	NSArray *children = node->_children;
+	for(NSUInteger i=0, count=children.count; i<count; i++){
+		CCNode *child = children[i];
+		
+		BOOL wasRunning = node.runningInActiveScene;
+		child->_pausedAncestors += increment;
+		[node wasRunning:wasRunning];
+		
+		RecursivelyIncrementPausedAncestors(child, increment);
+	}
+}
+
 /* "add" logic MUST only be on this method
  * If a class want's to extend the 'addChild' behaviour it only needs
  * to override this method
  */
--(void) addChild: (CCNode*) child z:(NSInteger)z tag:(NSInteger) aTag
+-(void) addChild: (CCNode*)child z:(NSInteger)z name:(NSString*)name
 {
 	NSAssert( child != nil, @"Argument must be non-nil");
 	NSAssert( child.parent == nil, @"child already added. It can't be added again");
@@ -630,19 +628,23 @@ static NSUInteger globalOrderOfArrival = 1;
 
 	[self insertChild:child z:z];
 
-	child.tag = aTag;
+	child.name = name;
 
 	[child setParent: self];
 
 	[child setOrderOfArrival: globalOrderOfArrival++];
-
-	if( _isRunning ) {
+	
+	// Update pausing parameters
+	child->_pausedAncestors = _pausedAncestors + (_paused ? 1 : 0);
+	RecursivelyIncrementPausedAncestors(child, child->_pausedAncestors);
+	
+	if( _isInActiveScene ) {
 		[child onEnter];
 		[child onEnterTransitionDidFinish];
 	}
     
     /** mark responder manager as dirty
-     @since v2.5
+     @since v3.0
      */
     [[[CCDirector sharedDirector] responderManager] markAsDirty];
 }
@@ -650,13 +652,13 @@ static NSUInteger globalOrderOfArrival = 1;
 -(void) addChild: (CCNode*) child z:(NSInteger)z
 {
 	NSAssert( child != nil, @"Argument must be non-nil");
-	[self addChild:child z:z tag:child.tag];
+	[self addChild:child z:z name:child.name];
 }
 
 -(void) addChild: (CCNode*) child
 {
 	NSAssert( child != nil, @"Argument must be non-nil");
-	[self addChild:child z:child.zOrder tag:child.tag];
+	[self addChild:child z:child.zOrder name:child.name];
 }
 
 -(void) removeFromParent
@@ -688,16 +690,16 @@ static NSUInteger globalOrderOfArrival = 1;
 		[self detachChild:child cleanup:cleanup];
 }
 
--(void) removeChildByTag:(NSInteger)aTag
+-(void) removeChildByName:(NSString*)name
 {
-	[self removeChildByTag:aTag cleanup:YES];
+	[self removeChildByName:name cleanup:YES];
 }
 
--(void) removeChildByTag:(NSInteger)aTag cleanup:(BOOL)cleanup
+-(void) removeChildByName:(NSString*)name cleanup:(BOOL)cleanup
 {
-	NSAssert( aTag != kCCNodeTagInvalid, @"Invalid tag");
+	NSAssert( !name, @"Invalid tag");
 
-	CCNode *child = [self getChildByTag:aTag];
+	CCNode *child = [self getChildByName:name];
 
 	if (child == nil)
 		CCLOG(@"cocos2d: removeChildByTag: child not found!");
@@ -718,12 +720,15 @@ static NSUInteger globalOrderOfArrival = 1;
 		// IMPORTANT:
 		//  -1st do onExit
 		//  -2nd cleanup
-		if (_isRunning)
+		if (_isInActiveScene)
 		{
 			[c onExitTransitionDidStart];
 			[c onExit];
 		}
-
+		
+		RecursivelyIncrementPausedAncestors(c, -c->_pausedAncestors);
+		c->_pausedAncestors = 0;
+		
 		if (cleanup)
 			[c cleanup];
 
@@ -731,7 +736,7 @@ static NSUInteger globalOrderOfArrival = 1;
 		[c setParent:nil];
         
         /** mark responder manager as dirty
-         @since v2.5
+         @since v3.0
          */
         [[[CCDirector sharedDirector] responderManager] markAsDirty];
 
@@ -745,12 +750,15 @@ static NSUInteger globalOrderOfArrival = 1;
 	// IMPORTANT:
 	//  -1st do onExit
 	//  -2nd cleanup
-	if (_isRunning)
+	if (_isInActiveScene)
 	{
 		[child onExitTransitionDidStart];
 		[child onExit];
 	}
-
+	
+	RecursivelyIncrementPausedAncestors(child, -child->_pausedAncestors);
+	child->_pausedAncestors = 0;
+	
 	// If you don't do cleanup, the child's actions will not get removed and the
 	// its scheduledSelectors_ dict will not get released!
 	if (doCleanup)
@@ -760,7 +768,7 @@ static NSUInteger globalOrderOfArrival = 1;
 	[child setParent:nil];
 
     /** mark responder manager as dirty
-     @since v2.5
+     @since v3.0
      */
     [[[CCDirector sharedDirector] responderManager] markAsDirty];
 
@@ -830,7 +838,7 @@ static NSUInteger globalOrderOfArrival = 1;
 		_isReorderChildDirty = NO;
         
         /** mark responder manager as dirty
-         @since v2.5
+         @since v3.0
          */
         [[[CCDirector sharedDirector] responderManager] markAsDirty];
 
@@ -850,9 +858,6 @@ static NSUInteger globalOrderOfArrival = 1;
 		return;
     
 	kmGLPushMatrix();
-
-	if ( _grid && _grid.active)
-		[_grid beforeDraw];
 
 	[self transform];
 
@@ -886,9 +891,6 @@ static NSUInteger globalOrderOfArrival = 1;
 	// reset for next frame
 	_orderOfArrival = 0;
 
-	if ( _grid && _grid.active)
-		[_grid afterDraw:self];
-
 	kmGLPopMatrix();
 }
 
@@ -915,46 +917,47 @@ static NSUInteger globalOrderOfArrival = 1;
 
 	kmGLMultMatrix( &transfrom4x4 );
 }
-
 #pragma mark CCPhysics support.
+
+// Private method used to extract the non-rigid part of the node's transform relative to a CCPhysicsNode.
+// This method can only be called in very specific circumstances.
+-(CGAffineTransform)nonRigidTransform
+{
+	return cpTransformMult(cpTransformInverse(self.physicsBody.absoluteTransform), NodeToPhysicsTransform(self));
+}
 
 // Overriden by CCPhysicsNode to return YES.
 -(BOOL)isPhysicsNode {return NO;}
 -(CCPhysicsNode *)physicsNode {return (self.isPhysicsNode ? (CCPhysicsNode *)self : self.parent.physicsNode);}
 
--(void)setPhysicsBody:(CCPhysicsBody *)physicsBody
+-(void)setupPhysicsBody:(CCPhysicsBody *)physicsBody
 {
-	if(physicsBody != _physicsBody){
-		// nil out the old body's node reference.
-		_physicsBody.node = nil;
-		
-		// Copy the old body position and rotation over
-		physicsBody.absolutePosition = _physicsBody.absolutePosition;
-		physicsBody.absoluteRadians = _physicsBody.absoluteRadians;
-		
-		_physicsBody = physicsBody;
-		_physicsBody.node = self;
-	}
-}
-
--(void)setupPhysics
-{
-	CCPhysicsBody *physicsBody = _physicsBody;
 	if(physicsBody){
 		CCPhysicsNode *physics = self.physicsNode;
-		NSAssert(physics != nil, @"A CCNode with an attached CCPhysicsBody must be added as a descendent of a CCPhysicsNode.");
-		
-		// Grab the origin position and approximate rotation of the node from it's transform.
-		// The transform may not be a rigid transform, so we'll need to approximate one.
-		CGAffineTransform transform = NodeToPhysicsTransform(self);
+		NSAssert(physics != nil, @"A CCNode with an attached CCPhysicsBody must be added as a descendant of a CCPhysicsNode.");
 		
 		// Copy the node's rotation first.
 		// Otherwise it may cause the position to rotate around a non-zero center of gravity.
-		physicsBody.absoluteRadians = atan2(transform.b, transform.a);
+		physicsBody.absoluteRadians = CC_DEGREES_TO_RADIANS(NodeToPhysicsRotation(self));
+		
+		// Grab the origin position of the node from it's transform.
+		CGAffineTransform transform = NodeToPhysicsTransform(self);
 		physicsBody.absolutePosition = ccp(transform.tx, transform.ty);
 		
-		[_physicsBody willAddToPhysicsNode:physics];
-		[physics.space smartAdd:_physicsBody];
+		cpTransform nonRigid = self.nonRigidTransform;
+		[_physicsBody willAddToPhysicsNode:physics nonRigidTransform:nonRigid];
+		[physics.space smartAdd:physicsBody];
+		
+		NSArray *joints = physicsBody.joints;
+		for(NSUInteger i=0, count=joints.count; i<count; i++){
+			[joints[i] tryAddToPhysicsNode:physics];
+		}
+		
+#ifndef NDEBUG
+		// Reset these to zero since they shouldn't be read anyway.
+		_position = CGPointZero;
+		_rotationalSkewX = _rotationalSkewY = 0.0f;
+#endif
 	}
 }
 
@@ -964,10 +967,39 @@ static NSUInteger globalOrderOfArrival = 1;
 		CCPhysicsNode *physics = self.physicsNode;
 		NSAssert(physics != nil, @"A CCNode with an attached CCPhysicsBody must be a descendent of a CCPhysicsNode.");
 		
-		// TODO need to reset the node's position info.
+		// Copy the positional data back to the ivars.
+		_position = self.position;
+		_rotationalSkewX = _rotationalSkewY = self.rotation;
 		
-		[_physicsBody didRemoveFromPhysicsNode:physics];
+		NSArray *joints = _physicsBody.joints;
+		for(NSUInteger i=0, count=joints.count; i<count; i++){
+			[joints[i] tryRemoveFromPhysicsNode:physics];
+		}
+		
 		[physics.space smartRemove:_physicsBody];
+		[_physicsBody didRemoveFromPhysicsNode:physics];
+	}
+}
+
+-(void)setPhysicsBody:(CCPhysicsBody *)physicsBody
+{
+	if(physicsBody){
+		NSAssert(_scaleType == CCScaleTypePoints, @"Currently only 'Points' is supported as a scale type for physics nodes.");
+		NSAssert(_rotationalSkewX == _rotationalSkewY, @"Currently physics nodes don't support skewing.");
+		NSAssert(_skewX == 0.0 && _skewY == 0.0, @"Currently physics nodes don't support skewing.");
+	}
+	
+	if(physicsBody != _physicsBody){
+		if(_isInActiveScene){
+			[self teardownPhysics];
+			[self setupPhysicsBody:physicsBody];
+		}
+		
+		// nil out the old body's node reference.
+		_physicsBody.node = nil;
+		
+		_physicsBody = physicsBody;
+		_physicsBody.node = self;
 	}
 }
 
@@ -980,11 +1012,17 @@ static NSUInteger globalOrderOfArrival = 1;
 -(void) onEnter
 {
 	[_children makeObjectsPerformSelector:@selector(onEnter)];
-	[self resumeSchedulerAndActions];
 	
-	[self setupPhysics];
+	[self setupPhysicsBody:_physicsBody];
 	
-	_isRunning = YES;
+	CCScheduler *scheduler = self.scheduler;
+	if(![scheduler isTargetScheduled:self]){
+		[scheduler scheduleTarget:self];
+	}
+	
+	BOOL wasRunning = self.runningInActiveScene;
+	_isInActiveScene = YES;
+	[self wasRunning:wasRunning];
 }
 
 -(void) onEnterTransitionDidFinish
@@ -999,11 +1037,12 @@ static NSUInteger globalOrderOfArrival = 1;
 
 -(void) onExit
 {
-	[self pauseSchedulerAndActions];
-	_isRunning = NO;
-	
 	[self teardownPhysics];
-
+	
+	BOOL wasRunning = self.runningInActiveScene;
+	_isInActiveScene = NO;
+	[self wasRunning:wasRunning];
+	
 	[_children makeObjectsPerformSelector:@selector(onExit)];
 }
 
@@ -1027,7 +1066,7 @@ static NSUInteger globalOrderOfArrival = 1;
 {
 	NSAssert( action != nil, @"Argument must be non-nil");
 
-	[_actionManager addAction:action target:self paused:!_isRunning];
+	[_actionManager addAction:action target:self paused:!self.runningInActiveScene];
 	return action;
 }
 
@@ -1060,10 +1099,21 @@ static NSUInteger globalOrderOfArrival = 1;
 
 #pragma mark CCNode - Scheduler
 
+-(NSInteger)priority
+{
+	return 0;
+}
+
+-(CCTimer *) scheduleBlock:(CCTimerBlock)block delay:(CCTime)delay
+{
+	return [self.scheduler scheduleBlock:block forTarget:self withDelay:delay];
+}
+
 -(void) setScheduler:(CCScheduler *)scheduler
 {
 	if( scheduler != _scheduler ) {
-		[self unscheduleAllSelectors];
+		#warning TODO needs to be recursive? (or remove per node schedulers?)
+		[self.scheduler unscheduleTarget:self];
 
 		_scheduler = scheduler;
 	}
@@ -1071,75 +1121,82 @@ static NSUInteger globalOrderOfArrival = 1;
 
 -(CCScheduler*) scheduler
 {
-	return _scheduler;
+	return (_scheduler ?: self.parent.scheduler);
 }
 
--(void) scheduleUpdate
+-(CCTimer *) schedule:(SEL)selector interval:(CCTime)interval
 {
-	[self scheduleUpdateWithPriority:0];
+	return [self schedule:selector interval:interval repeat:kCCRepeatForever delay:0];
 }
 
--(void) scheduleUpdateWithPriority:(NSInteger)priority
-{
-	[_scheduler scheduleUpdateForTarget:self priority:priority paused:!_isRunning];
-}
-
--(void) unscheduleUpdate
-{
-	[_scheduler unscheduleUpdateForTarget:self];
-}
-
--(void) schedule:(SEL)selector
-{
-	[self schedule:selector interval:0 repeat:kCCRepeatForever delay:0];
-}
-
--(void) schedule:(SEL)selector interval:(ccTime)interval
-{
-	[self schedule:selector interval:interval repeat:kCCRepeatForever delay:0];
-}
-
--(void) schedule:(SEL)selector interval:(ccTime)interval repeat: (uint) repeat delay:(ccTime) delay
+-(CCTimer *) schedule:(SEL)selector interval:(CCTime)interval repeat: (uint) repeat delay:(CCTime) delay
 {
 	NSAssert( selector != nil, @"Argument must be non-nil");
 	NSAssert( interval >=0, @"Arguemnt must be positive");
-
-	[_scheduler scheduleSelector:selector forTarget:self interval:interval repeat:repeat delay:delay paused:!_isRunning];
+	
+	[self unschedule:selector];
+	
+	void (*imp)(id, SEL, CCTime) = (__typeof(imp))[self methodForSelector:selector];
+	CCTimer *timer = [self.scheduler scheduleBlock:^(CCTimer *t){
+		imp(self, selector, t.deltaTime);
+	} forTarget:self withDelay:delay];
+	
+	timer.repeatCount = CCTimerRepeatForever;
+	timer.repeatInterval = interval;
+	timer.userData = NSStringFromSelector(selector);
+	
+	return timer;
 }
 
-- (void) scheduleOnce:(SEL) selector delay:(ccTime) delay
+- (CCTimer *) scheduleOnce:(SEL) selector delay:(CCTime) delay
 {
-	[self schedule:selector interval:0.f repeat:0 delay:delay];
+	return [self schedule:selector interval:0.f repeat:0 delay:delay];
 }
 
--(void) unschedule:(SEL)selector
+-(void)unschedule:(SEL)selector
 {
-	// explicit nil handling
-	if (selector == nil)
-		return;
-
-	[_scheduler unscheduleSelector:selector forTarget:self];
+	NSString *selectorName = NSStringFromSelector(selector);
+	
+	for(CCTimer *timer in [self.scheduler timersForTarget:self]){
+		if([selectorName isEqual:timer.userData]) [timer invalidate];
+	}
 }
 
--(void) unscheduleAllSelectors
+-(void)unscheduleAllSelectors
 {
-	[_scheduler unscheduleAllForTarget:self];
-}
-- (void) resumeSchedulerAndActions
-{
-	[_scheduler resumeTarget:self];
-	[_actionManager resumeTarget:self];
+	for(CCTimer *timer in [self.scheduler timersForTarget:self]){
+		if([timer.userData isKindOfClass:[NSString class]]) [timer invalidate];
+	}
 }
 
-- (void) pauseSchedulerAndActions
+// Used to pause/unpause a node's actions and timers when it's isRunning state changes.
+-(void)wasRunning:(BOOL)wasRunning
 {
-	[_scheduler pauseTarget:self];
-	[_actionManager pauseTarget:self];
+	BOOL isRunning = self.runningInActiveScene;
+	
+	if(isRunning && !wasRunning){
+		[self.scheduler setPaused:NO target:self];
+		[_actionManager resumeTarget:self];
+	} else if(!isRunning && wasRunning){
+		[self.scheduler setPaused:YES target:self];
+		[_actionManager pauseTarget:self];
+	}
 }
 
-/* override me */
--(void) update:(ccTime)delta
+-(BOOL)isRunningInActiveScene
 {
+	return (_isInActiveScene && !_paused && _pausedAncestors == 0);
+}
+
+-(void)setPaused:(BOOL)paused
+{
+	if(_paused != paused){
+		BOOL wasRunning = self.runningInActiveScene;
+		_paused = paused;
+		[self wasRunning:wasRunning];
+		
+		RecursivelyIncrementPausedAncestors(self, (paused ? 1 : -1));
+	}
 }
 
 #pragma mark CCNode Transform
@@ -1154,33 +1211,33 @@ static NSUInteger globalOrderOfArrival = 1;
     
     // Convert position to points
     CCPositionUnit xUnit = type.xUnit;
-    if (xUnit == kCCPositionUnitPoints) x = position.x;
-    else if (xUnit == kCCPositionUnitScaled) x = position.x * director.positionScaleFactor;
-    else if (xUnit == kCCPositionUnitNormalized) x = position.x * _parent.contentSizeInPoints.width;
+    if (xUnit == CCPositionUnitPoints) x = position.x;
+    else if (xUnit == CCPositionUnitScaled) x = position.x * director.positionScaleFactor;
+    else if (xUnit == CCPositionUnitNormalized) x = position.x * _parent.contentSizeInPoints.width;
     
     CCPositionUnit yUnit = type.yUnit;
-    if (yUnit == kCCPositionUnitPoints) y = position.y;
-    else if (yUnit == kCCPositionUnitScaled) y = position.y * director.positionScaleFactor;
-    else if (yUnit == kCCPositionUnitNormalized) y = position.y * _parent.contentSizeInPoints.height;
+    if (yUnit == CCPositionUnitPoints) y = position.y;
+    else if (yUnit == CCPositionUnitScaled) y = position.y * director.positionScaleFactor;
+    else if (yUnit == CCPositionUnitNormalized) y = position.y * _parent.contentSizeInPoints.height;
     
     // Account for reference corner
     CCPositionReferenceCorner corner = _positionType.corner;
-    if (corner == kCCPositionReferenceCornerBottomLeft)
+    if (corner == CCPositionReferenceCornerBottomLeft)
     {
         // Nothing needs to be done
     }
-    else if (corner == kCCPositionReferenceCornerTopLeft)
+    else if (corner == CCPositionReferenceCornerTopLeft)
     {
         // Reverse y-axis
         y = _parent.contentSizeInPoints.height - y;
     }
-    else if (corner == kCCPositionReferenceCornerTopRight)
+    else if (corner == CCPositionReferenceCornerTopRight)
     {
         // Reverse x-axis and y-axis
         x = _parent.contentSizeInPoints.width - x;
         y = _parent.contentSizeInPoints.height - y;
     }
-    else if (corner == kCCPositionReferenceCornerBottomRight)
+    else if (corner == CCPositionReferenceCornerBottomRight)
     {
         // Reverse x-axis
         x = _parent.contentSizeInPoints.width - x;
@@ -1203,22 +1260,22 @@ static NSUInteger globalOrderOfArrival = 1;
     
     // Account for reference corner
     CCPositionReferenceCorner corner = type.corner;
-    if (corner == kCCPositionReferenceCornerBottomLeft)
+    if (corner == CCPositionReferenceCornerBottomLeft)
     {
         // Nothing needs to be done
     }
-    else if (corner == kCCPositionReferenceCornerTopLeft)
+    else if (corner == CCPositionReferenceCornerTopLeft)
     {
         // Reverse y-axis
         y = _parent.contentSizeInPoints.height - y;
     }
-    else if (corner == kCCPositionReferenceCornerTopRight)
+    else if (corner == CCPositionReferenceCornerTopRight)
     {
         // Reverse x-axis and y-axis
         x = _parent.contentSizeInPoints.width - x;
         y = _parent.contentSizeInPoints.height - y;
     }
-    else if (corner == kCCPositionReferenceCornerBottomRight)
+    else if (corner == CCPositionReferenceCornerBottomRight)
     {
         // Reverse x-axis
         x = _parent.contentSizeInPoints.width - x;
@@ -1226,9 +1283,9 @@ static NSUInteger globalOrderOfArrival = 1;
     
     // Convert position from points
     CCPositionUnit xUnit = type.xUnit;
-    if (xUnit == kCCPositionUnitPoints) position.x = x;
-    else if (xUnit == kCCPositionUnitScaled) position.x = x / director.positionScaleFactor;
-    else if (xUnit == kCCPositionUnitNormalized)
+    if (xUnit == CCPositionUnitPoints) position.x = x;
+    else if (xUnit == CCPositionUnitScaled) position.x = x / director.positionScaleFactor;
+    else if (xUnit == CCPositionUnitNormalized)
     {
         float parentWidth = _parent.contentSizeInPoints.width;
         if (parentWidth > 0)
@@ -1238,9 +1295,9 @@ static NSUInteger globalOrderOfArrival = 1;
     }
     
     CCPositionUnit yUnit = type.yUnit;
-    if (yUnit == kCCPositionUnitPoints) position.y = y;
-    else if (yUnit == kCCPositionUnitScaled) position.y = y / director.positionScaleFactor;
-    else if (yUnit == kCCPositionUnitNormalized)
+    if (yUnit == CCPositionUnitPoints) position.y = y;
+    else if (yUnit == CCPositionUnitScaled) position.y = y / director.positionScaleFactor;
+    else if (yUnit == CCPositionUnitNormalized)
     {
         float parentHeight = _parent.contentSizeInPoints.height;
         if (parentHeight > 0)
@@ -1254,40 +1311,43 @@ static NSUInteger globalOrderOfArrival = 1;
 
 - (CGPoint) positionInPoints
 {
-    return [self convertPositionToPoints:GetPosition(self) type:_positionType];
+    return [self convertPositionToPoints:self.position type:_positionType];
 }
 
 - (CGAffineTransform)nodeToParentTransform
 {
-	// TODO need to find a better way to mark physics transforms as dirty.
-	if ( _isTransformDirty || _physicsBody ) {
+	CCPhysicsBody *physicsBody = GetBodyIfRunning(self);
+	if(physicsBody){
+		CGAffineTransform rigidTransform = RigidBodyToParentTransform(self, physicsBody);
+		_transform = cpTransformMult(rigidTransform, cpTransformScale(_scaleX, _scaleY));
+	} else if ( _isTransformDirty ) {
         
         // TODO: Make this more efficient
         CGSize contentSizeInPoints = self.contentSizeInPoints;
         _anchorPointInPoints = ccp( contentSizeInPoints.width * _anchorPoint.x, contentSizeInPoints.height * _anchorPoint.y );
         
         // Convert position to points
-        CGPoint positionInPoints = [self convertPositionToPoints:GetPosition(self) type:_positionType];
+        CGPoint positionInPoints = [self convertPositionToPoints:_position type:_positionType];
 		float x = positionInPoints.x;
 		float y = positionInPoints.y;
         
 		// Rotation values
 		// Change rotation code to handle X and Y
 		// If we skew with the exact same value for both x and y then we're simply just rotating
-//		float cx = 1, sx = 0, cy = 1, sy = 0;
-//		if( _rotationX || _rotationY ) {
-			float radiansX = -CC_DEGREES_TO_RADIANS(GetRotationX(self));
-			float radiansY = -CC_DEGREES_TO_RADIANS(GetRotationY(self));
-			float cx = cosf(radiansX);
-			float sx = sinf(radiansX);
-			float cy = cosf(radiansY);
-			float sy = sinf(radiansY);
-//		}
+		float cx = 1, sx = 0, cy = 1, sy = 0;
+		if( _rotationalSkewX || _rotationalSkewY ) {
+			float radiansX = -CC_DEGREES_TO_RADIANS(_rotationalSkewX);
+			float radiansY = -CC_DEGREES_TO_RADIANS(_rotationalSkewY);
+			cx = cosf(radiansX);
+			sx = sinf(radiansX);
+			cy = cosf(radiansY);
+			sy = sinf(radiansY);
+		}
 
 		BOOL needsSkewMatrix = ( _skewX || _skewY );
         
         float scaleFactor = 1;
-        if (_scaleType == kCCScaleTypeScaled) scaleFactor = [CCDirector sharedDirector].positionScaleFactor;
+        if (_scaleType == CCScaleTypeScaled) scaleFactor = [CCDirector sharedDirector].positionScaleFactor;
 
 		// optimization:
 		// inline anchor point calculation if skew is not needed
@@ -1326,7 +1386,7 @@ static NSUInteger globalOrderOfArrival = 1;
 - (CGAffineTransform)parentToNodeTransform
 {
 	// TODO Need to find a better way to mark physics transforms as dirty
-	if ( _isInverseDirty || _physicsBody ) {
+	if ( _isInverseDirty || GetBodyIfRunning(self) ) {
 		_inverse = CGAffineTransformInvert([self nodeToParentTransform]);
 		_isInverseDirty = NO;
 	}
@@ -1379,49 +1439,22 @@ static NSUInteger globalOrderOfArrival = 1;
 	return [[CCDirector sharedDirector] convertToUI:worldPoint];
 }
 
-// convenience methods which take a UITouch instead of CGPoint
-
-#ifdef __CC_PLATFORM_IOS
-
-- (CGPoint)convertTouchToNodeSpace:(UITouch *)touch
-{
-	CGPoint point = [touch locationInView: [touch view]];
-	point = [[CCDirector sharedDirector] convertToGL: point];
-	return [self convertToNodeSpace:point];
-}
-
-- (CGPoint)convertTouchToNodeSpaceAR:(UITouch *)touch
-{
-	CGPoint point = [touch locationInView: [touch view]];
-	point = [[CCDirector sharedDirector] convertToGL: point];
-	return [self convertToNodeSpaceAR:point];
-}
-
-#endif // __CC_PLATFORM_IOS
-
 // -----------------------------------------------------------------
 #pragma mark - touch interface
 // -----------------------------------------------------------------
 
 /** Returns YES, if touch is inside sprite
  Added hit area expansion / contraction
- @since v2.5
+ @since v3.0
  */
 - (BOOL)hitTestWithWorldPos:(CGPoint)pos
 {
     pos = [self convertToNodeSpace:pos];
-    CGPoint offset = CGPointMake(self.contentSizeInPoints.width * (1 - _hitAreaExpansion) / 2, self.contentSizeInPoints.height * (1 - _hitAreaExpansion) / 2 );
+    CGPoint offset = ccp(-_hitAreaExpansion, -_hitAreaExpansion);
     CGSize size = CGSizeMake(self.contentSizeInPoints.width - offset.x, self.contentSizeInPoints.height - offset.y);
     if ((pos.y < offset.y) || (pos.y > size.height) || (pos.x < offset.x) || (pos.x > size.width)) return(NO);
     
     return(YES);
-}
-
-- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
-{
-    if (_userInteractionEnabled == userInteractionEnabled) return;
-    _userInteractionEnabled = userInteractionEnabled;
-    [[[CCDirector sharedDirector] responderManager] markAsDirty];
 }
 
 // -----------------------------------------------------------------

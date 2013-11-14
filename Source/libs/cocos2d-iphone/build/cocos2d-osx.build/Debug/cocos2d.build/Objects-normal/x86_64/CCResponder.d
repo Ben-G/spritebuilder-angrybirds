@@ -10,4 +10,5 @@ dependencies: \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/Platforms/Mac/CCGLView.h \
   /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCProtocols.h \
   external/kazmath/include/kazmath/mat4.h \
-  external/kazmath/include/kazmath/utility.h
+  external/kazmath/include/kazmath/utility.h \
+  /Users/Lidholt/Projects/SpriteBuilder/SpriteBuilder/libs/cocos2d-iphone/cocos2d/CCDirector_Private.h
