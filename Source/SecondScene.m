@@ -27,7 +27,7 @@
 - (void)fire {
     CCSpriteFrame* spriteFrame = [CCSpriteFrame frameWithImageNamed:@"ccbResources/flyingpenguin.png"];
     CCSprite *bullet = [CCSprite spriteWithSpriteFrame:spriteFrame];
-    bullet.position = ccp(0, self.catapultArm.contentSize.height);
+    bullet.position = ccp(24, self.catapultArm.contentSize.height-20);
     [self.catapultArm addChild:bullet];
     
     CCBAnimationManager* animationManager = self.userObject;

@@ -5,36 +5,36 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>E6E4E049-0100-4366-803A-68248F58A9ED</string>
+	<string>BA9374E0-ADCB-405A-8573-5BE3AC3B6C45</string>
 	<key>IDESourceControlProjectName</key>
 	<string>FirstProject</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>741E8C41-2FA9-4A4F-87D7-05B1DDDD9EEA</key>
-		<string>https://github.com/Ben-G/spritebuilder-example.git</string>
+		<key>F4AC00DF-9ACD-4646-8D52-682708EF30A9</key>
+		<string>https://github.com/Ben-G/spritebuilder-angrybirds.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>FirstProject.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>741E8C41-2FA9-4A4F-87D7-05B1DDDD9EEA</key>
+		<key>F4AC00DF-9ACD-4646-8D52-682708EF30A9</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/Ben-G/spritebuilder-example.git</string>
+	<string>https://github.com/Ben-G/spritebuilder-angrybirds.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>741E8C41-2FA9-4A4F-87D7-05B1DDDD9EEA</string>
+	<string>F4AC00DF-9ACD-4646-8D52-682708EF30A9</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>741E8C41-2FA9-4A4F-87D7-05B1DDDD9EEA</string>
+			<string>F4AC00DF-9ACD-4646-8D52-682708EF30A9</string>
 			<key>IDESourceControlWCCName</key>
-			<string>FirstProject</string>
+			<string>AngryBird</string>
 		</dict>
 	</array>
 </dict>
