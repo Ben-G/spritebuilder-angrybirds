@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62407CD7183ADDD000C188FF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62407CD6183ADDD000C188FF /* Images.xcassets */; };
 		62447814183584BE0026B356 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6244780D183579CA0026B356 /* libcocos2d.a */; };
 		62A48D9518201E1B00936E89 /* SecondScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 62A48D9418201E1B00936E89 /* SecondScene.m */; };
 		62A48DA61821B01C00936E89 /* Published-iOS in Resources */ = {isa = PBXBuildFile; fileRef = B737893A180761570076A88C /* Published-iOS */; };
@@ -66,6 +67,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		62407CD6183ADDD000C188FF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FirstProject/Images.xcassets; sourceTree = SOURCE_ROOT; };
 		62447801183579C80026B356 /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Source/libs/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		62A48D9318201E1B00936E89 /* SecondScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SecondScene.h; path = Source/SecondScene.h; sourceTree = "<group>"; };
 		62A48D9418201E1B00936E89 /* SecondScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SecondScene.m; path = Source/SecondScene.m; sourceTree = "<group>"; };
@@ -86,7 +88,7 @@
 		B73789861807631A0076A88C /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Prefix.pch; path = Source/Prefix.pch; sourceTree = SOURCE_ROOT; };
 		B7378992180767190076A88C /* MainScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainScene.h; path = Source/MainScene.h; sourceTree = "<group>"; };
 		B7378993180767190076A88C /* MainScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MainScene.m; path = Source/MainScene.m; sourceTree = "<group>"; };
-		B77F1B2E17B978D7009739AE /* FirstProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FirstProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B77F1B2E17B978D7009739AE /* Angry Clone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Angry Clone.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B77F1B3117B978D7009739AE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		B77F1B3317B978D7009739AE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		B77F1B3517B978D7009739AE /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -176,7 +178,7 @@
 		B77F1B2F17B978D7009739AE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B77F1B2E17B978D7009739AE /* FirstProject.app */,
+				B77F1B2E17B978D7009739AE /* Angry Clone.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -201,6 +203,7 @@
 		B77F1B4617B978D7009739AE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				62407CD6183ADDD000C188FF /* Images.xcassets */,
 				B73789911807667A0076A88C /* Icons */,
 				B737893A180761570076A88C /* Published-iOS */,
 			);
@@ -230,9 +233,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B77F1B2D17B978D7009739AE /* FirstProject */ = {
+		B77F1B2D17B978D7009739AE /* Angry Clone */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B77F1CDE17B978D8009739AE /* Build configuration list for PBXNativeTarget "FirstProject" */;
+			buildConfigurationList = B77F1CDE17B978D8009739AE /* Build configuration list for PBXNativeTarget "Angry Clone" */;
 			buildPhases = (
 				B77F1B2A17B978D7009739AE /* Sources */,
 				B77F1B2B17B978D7009739AE /* Frameworks */,
@@ -242,9 +245,9 @@
 			);
 			dependencies = (
 			);
-			name = FirstProject;
+			name = "Angry Clone";
 			productName = Example;
-			productReference = B77F1B2E17B978D7009739AE /* FirstProject.app */;
+			productReference = B77F1B2E17B978D7009739AE /* Angry Clone.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -283,7 +286,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				B77F1B2D17B978D7009739AE /* FirstProject */,
+				B77F1B2D17B978D7009739AE /* Angry Clone */,
 			);
 		};
 /* End PBXProject section */
@@ -333,6 +336,7 @@
 				B737897A180762440076A88C /* Icon-Small-50.png in Resources */,
 				B7378979180762440076A88C /* Icon-72.png in Resources */,
 				B737897D180762440076A88C /* Icon.png in Resources */,
+				62407CD7183ADDD000C188FF /* Images.xcassets in Resources */,
 				B7378977180762440076A88C /* Default.png in Resources */,
 				B737897B180762440076A88C /* Icon-Small.png in Resources */,
 			);
@@ -400,6 +404,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -422,7 +428,7 @@
 					"-lsqlite3",
 					"-ObjC",
 				);
-				PRODUCT_NAME = FirstProject;
+				PRODUCT_NAME = "Angry Clone";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
@@ -433,6 +439,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
@@ -453,7 +461,7 @@
 					"-lsqlite3",
 					"-ObjC",
 				);
-				PRODUCT_NAME = FirstProject;
+				PRODUCT_NAME = "Angry Clone";
 				PROVISIONING_PROFILE = "";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
@@ -472,7 +480,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B77F1CDE17B978D8009739AE /* Build configuration list for PBXNativeTarget "FirstProject" */ = {
+		B77F1CDE17B978D8009739AE /* Build configuration list for PBXNativeTarget "Angry Clone" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B77F1CDF17B978D8009739AE /* Debug */,
